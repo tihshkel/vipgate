@@ -1,10 +1,12 @@
 // Конфигурация API
-// Для разработки без бэкенда используйте MOCK_MODE = true
+// ПЕРЕКЛЮЧЕНИЕ РЕЖИМОВ:
+// true = работа БЕЗ бэкенда (mock данные)
+// false = работа С бэкендом (реальный API)
+
+const USE_MOCK = false  // ← ИЗМЕНИТЕ НА false ДЛЯ РАБОТЫ С БЭКЕНДОМ
 
 export const API_CONFIG = {
-  // Режим моков (true - использовать заглушки, false - реальный API)
-  // По умолчанию используем моки для удобства разработки
-  MOCK_MODE: import.meta.env.VITE_USE_MOCK_API !== 'false',
+  MOCK_MODE: USE_MOCK,
   
   // URL бэкенда
   BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',

@@ -88,9 +88,9 @@ def send_verification_code(request):
 
     try:
         task_result = send_verification_code_email.delay(email, code)
-        logger.info(f"✅ Celery задача отправлена для {email}. Task ID: {task_result.id}")
+        logger.info(f"Celery задача отправлена для {email}. Task ID: {task_result.id}")
         print("\n" + "="*50)
-        print(f"✅ CELERY: Код верификации отправлен асинхронно для {email}: {code}")
+        print(f"CELERY: Код верификации отправлен асинхронно для {email}: {code}")
         print(f"Task ID: {task_result.id}")
         print("="*50 + "\n")
     except Exception as e:
