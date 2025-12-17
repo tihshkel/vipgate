@@ -78,43 +78,138 @@ const PersonalData = ({ userEmail, onLogout }) => {
 
   // Photo upload state
   const [photo, setPhoto] = useState(null)
+  const [photoFile, setPhotoFile] = useState(null) // Для хранения файла для загрузки
   const [isDragging, setIsDragging] = useState(false)
   const fileInputRef = useRef(null)
+  
+  // Loading and saving state
+  const [isLoading, setIsLoading] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveMessage, setSaveMessage] = useState('')
 
-  // Load data from localStorage
+  // Load data from server on mount
   useEffect(() => {
-    const saved = localStorage.getItem('personalData')
-    if (saved) {
-      try {
-        const data = JSON.parse(saved)
-        if (data.firstName) setFirstName(data.firstName)
-        if (data.lastName) setLastName(data.lastName)
-        if (data.email) setEmail(data.email)
-        if (data.phoneNumber) setPhoneNumber(data.phoneNumber)
-        if (data.selectedCountryCode) setSelectedCountryCode(data.selectedCountryCode)
-        if (data.day) setDay(data.day)
-        if (data.month) setMonth(data.month)
-        if (data.year) setYear(data.year)
-        if (data.citizenship) setCitizenship(data.citizenship)
-        if (data.photo) setPhoto(data.photo)
-      } catch (e) {
-        console.error("Error parsing saved data", e)
+    if (email) {
+      loadProfile()
+    }
+  }, [email])
+
+  // Load profile from server
+  const loadProfile = async () => {
+    if (!email) return
+    
+    setIsLoading(true)
+    try {
+      const response = await fetch(`http://localhost:8000/api/auth/profile/?email=${encodeURIComponent(email)}`)
+      if (response.ok) {
+        const data = await response.json()
+        
+        // Заполняем форму данными из сервера
+        if (data.first_name) setFirstName(data.first_name)
+        if (data.last_name) setLastName(data.last_name)
+        if (data.phone) setPhoneNumber(data.phone)
+        if (data.phone_country_code) setSelectedCountryCode(data.phone_country_code.replace('+', ''))
+        
+        // Разбиваем дату рождения на компоненты
+        if (data.date_of_birth) {
+          const date = new Date(data.date_of_birth)
+          setDay(date.getDate())
+          setMonth(date.getMonth() + 1)
+          setYear(date.getFullYear())
+        }
+        
+        if (data.nationality) setCitizenship(data.nationality)
+        if (data.profile_photo_url) setPhoto(data.profile_photo_url)
       }
+    } catch (error) {
+      console.error('Error loading profile:', error)
+    } finally {
+      setIsLoading(false)
     }
-  }, [])
+  }
 
-  // Save data to localStorage
-  useEffect(() => {
-    const data = {
-      firstName, lastName, email, phoneNumber, selectedCountryCode,
-      day, month, year, citizenship, photo
+  // Save profile to server
+  const saveProfile = async () => {
+    if (!email) {
+      setSaveMessage('Email не указан')
+      return
     }
-    localStorage.setItem('personalData', JSON.stringify(data))
-  }, [firstName, lastName, email, phoneNumber, selectedCountryCode, day, month, year, citizenship, photo])
+    
+    setIsSaving(true)
+    setSaveMessage('')
+    
+    try {
+      const formData = {
+        email: email,
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+        phone: phoneNumber.trim(),
+        phone_country_code: `+${selectedCountryCode}`,
+        birth_day: day ? parseInt(day) : null,
+        birth_month: month ? parseInt(month) : null,
+        birth_year: year ? parseInt(year) : null,
+        nationality: citizenship.trim(),
+      }
+      
+      const response = await fetch('http://localhost:8000/api/auth/profile/update/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+      
+      if (response.ok) {
+        const result = await response.json()
+        setSaveMessage('✅ Данные успешно сохранены')
+        setTimeout(() => setSaveMessage(''), 3000)
+        
+        // Если есть фото для загрузки, загружаем его
+        if (photoFile) {
+          await uploadPhoto()
+        }
+      } else {
+        const error = await response.json()
+        setSaveMessage(`❌ Ошибка: ${error.error || 'Не удалось сохранить данные'}`)
+      }
+    } catch (error) {
+      console.error('Error saving profile:', error)
+      setSaveMessage('❌ Ошибка при сохранении данных')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Upload photo
+  const uploadPhoto = async () => {
+    if (!photoFile || !email) return
+    
+    try {
+      const formData = new FormData()
+      formData.append('photo', photoFile)
+      formData.append('email', email)
+      
+      const response = await fetch('http://localhost:8000/api/auth/profile/upload-photo/', {
+        method: 'POST',
+        body: formData,
+      })
+      
+      if (response.ok) {
+        const result = await response.json()
+        setPhoto(result.photo_url)
+        setPhotoFile(null) // Очищаем файл после успешной загрузки
+        setSaveMessage('✅ Фото успешно загружено')
+      }
+    } catch (error) {
+      console.error('Error uploading photo:', error)
+      setSaveMessage('❌ Ошибка при загрузке фото')
+    }
+  }
 
   const handleRemovePhoto = (e) => {
     e.stopPropagation()
     setPhoto(null)
+    setPhotoFile(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -123,6 +218,10 @@ const PersonalData = ({ userEmail, onLogout }) => {
   const handleFileChange = (e) => {
     const file = e.target.files[0]
     if (file && file.type.startsWith('image/')) {
+      // Сохраняем файл для загрузки на сервер
+      setPhotoFile(file)
+      
+      // Показываем превью
       const reader = new FileReader()
       reader.onload = (e) => setPhoto(e.target.result)
       reader.readAsDataURL(file)
@@ -144,6 +243,10 @@ const PersonalData = ({ userEmail, onLogout }) => {
     setIsDragging(false)
     const file = e.dataTransfer.files[0]
     if (file && file.type.startsWith('image/')) {
+      // Сохраняем файл для загрузки на сервер
+      setPhotoFile(file)
+      
+      // Показываем превью
       const reader = new FileReader()
       reader.onload = (e) => setPhoto(e.target.result)
       reader.readAsDataURL(file)
@@ -384,13 +487,26 @@ const PersonalData = ({ userEmail, onLogout }) => {
                </div>
             </div>
 
+            {/* Save Message */}
+            {saveMessage && (
+              <div className={`text-sm font-medium ${saveMessage.includes('✅') ? 'text-green-600' : 'text-red-600'}`}>
+                {saveMessage}
+              </div>
+            )}
+
             {/* Buttons */}
             <div className="flex items-center justify-end gap-4">
                <button className="px-6 py-2.5 rounded border border-red-500 text-red-500 text-sm font-medium hover:bg-red-50 transition-colors">
                   Удалить аккаунт
                </button>
-               <button className="px-6 py-2.5 rounded bg-[#002C6E] text-white text-sm font-medium hover:opacity-90 transition-opacity">
-                  Сохранить
+               <button 
+                 onClick={saveProfile}
+                 disabled={isSaving}
+                 className={`px-6 py-2.5 rounded bg-[#002C6E] text-white text-sm font-medium transition-opacity ${
+                   isSaving ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'
+                 }`}
+               >
+                  {isSaving ? 'Сохранение...' : 'Сохранить'}
                </button>
             </div>
           </div>

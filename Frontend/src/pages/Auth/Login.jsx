@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { RussianFlagIcon, QuestionIcon, ChatIcon, DownloadIcon } from '../../components/ui/Icons'
+import { sendVerificationCode, verifyCode } from '../../utils/api'
 import LoginIconSvg from '../../assets/icons/login-icon.svg'
 import GoogleIconSvg from '../../assets/icons/Icon/Social/Google.svg'
 import AppleIconSvg from '../../assets/icons/Icon/Social/Apple.svg'
@@ -32,6 +33,10 @@ const Login = ({ onClose, onLoginSuccess }) => {
   const [countdown, setCountdown] = useState(60)
   const [canResend, setCanResend] = useState(false)
   const [codeError, setCodeError] = useState(false)
+  const [codeErrorType, setCodeErrorType] = useState(null) // 'invalid_code' или 'expired'
+  const [sendCodeError, setSendCodeError] = useState(null) // Ошибка отправки кода
+  const [isLoading, setIsLoading] = useState(false)
+  const [isSendingCode, setIsSendingCode] = useState(false) // Отправка кода в фоне
   const countdownIntervalRef = useRef(null)
 
   const validateEmail = (email) => {
@@ -93,17 +98,39 @@ const Login = ({ onClose, onLoginSuccess }) => {
     }
   }, [showCodeVerification, countdown])
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (isEmailValid) {
+      // Сразу переходим на страницу ввода кода для лучшего UX
       setShowCodeVerification(true)
       setCountdown(60)
       setCanResend(false)
       setFocusedCodeIndex(0)
       setCodeError(false)
+      setCodeErrorType(null)
+      setSendCodeError(null)
+      setIsSendingCode(true)
+      
       // Фокусируемся на первой ячейке после небольшой задержки
       setTimeout(() => {
         codeInputRefs[0]?.current?.focus()
       }, 100)
+
+      // Отправляем код асинхронно в фоне
+      try {
+        const response = await sendVerificationCode(email)
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          // Ошибка при отправке кода - показываем на странице ввода
+          setSendCodeError(data.error || 'Ошибка при отправке кода верификации')
+        }
+      } catch (error) {
+        console.error('Error sending verification code:', error)
+        setSendCodeError('Ошибка при отправке кода верификации. Проверьте подключение к серверу.')
+      } finally {
+        setIsSendingCode(false)
+      }
     }
   }
 
@@ -115,6 +142,7 @@ const Login = ({ onClose, onLoginSuccess }) => {
     // Сбрасываем ошибку при изменении кода
     if (codeError) {
       setCodeError(false)
+      setCodeErrorType(null)
     }
     
     const newCode = [...code]
@@ -157,10 +185,33 @@ const Login = ({ onClose, onLoginSuccess }) => {
     }
   }
 
-  const handleResendCode = () => {
-    setCountdown(60)
-    setCanResend(false)
-    // Здесь можно добавить логику повторной отправки кода
+  const handleResendCode = async () => {
+    setIsSendingCode(true)
+    setSendCodeError(null)
+    setCodeError(false)
+    setCodeErrorType(null)
+    
+      try {
+        const response = await sendVerificationCode(email)
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setCountdown(60)
+        setCanResend(false)
+        setCode(['', '', '', '', '', ''])
+        setTimeout(() => {
+          codeInputRefs[0]?.current?.focus()
+        }, 100)
+      } else {
+        setSendCodeError(data.error || 'Ошибка при повторной отправке кода')
+      }
+    } catch (error) {
+      console.error('Error resending verification code:', error)
+      setSendCodeError('Ошибка при повторной отправке кода')
+    } finally {
+      setIsSendingCode(false)
+    }
   }
 
   const handleBackToLogin = () => {
@@ -169,24 +220,54 @@ const Login = ({ onClose, onLoginSuccess }) => {
     setCountdown(60)
     setCanResend(false)
     setCodeError(false)
+    setCodeErrorType(null)
+    setSendCodeError(null)
+    setIsSendingCode(false)
   }
 
-  const handleConfirmCode = () => {
+  const handleConfirmCode = async () => {
     if (isCodeComplete) {
-      // Здесь будет проверка кода
-      // Для демонстрации: если код неправильный, устанавливаем ошибку
+      setIsLoading(true)
       const enteredCode = code.join('')
-      // Пример: если код не равен "123456", показываем ошибку
-      // В реальном приложении здесь будет проверка с сервером
-      if (enteredCode !== '123456') {
-        setCodeError(true)
-      } else {
-        // Код правильный, переходим дальше
-        setCodeError(false)
-        // Вызываем колбэк успешной авторизации с email пользователя
-        if (onLoginSuccess) {
-          onLoginSuccess(email)
+      
+      try {
+        // Отправляем запрос на проверку кода
+        const response = await verifyCode(email, enteredCode)
+
+        const data = await response.json()
+
+        if (response.ok && data.verified) {
+          // Код правильный, переходим дальше
+          setCodeError(false)
+          setCodeErrorType(null)
+          // Вызываем колбэк успешной авторизации с email пользователя
+          if (onLoginSuccess) {
+            onLoginSuccess(email)
+          }
+        } else {
+          // Получаем тип ошибки от сервера
+          const errorType = data.error_type || 'invalid_code'
+          setCodeError(true)
+          setCodeErrorType(errorType)
+          
+          // Если код истек, не очищаем поля ввода
+          if (errorType === 'expired') {
+            // Не очищаем код, чтобы пользователь мог увидеть, что он ввел
+          } else {
+            // Очищаем код для повторного ввода при неверном коде
+            setCode(['', '', '', '', '', ''])
+            setTimeout(() => {
+              codeInputRefs[0]?.current?.focus()
+            }, 100)
+          }
         }
+      } catch (error) {
+        console.error('Error verifying code:', error)
+        // При сетевой ошибке показываем общую ошибку
+        setCodeError(true)
+        setCodeErrorType('expired')
+      } finally {
+        setIsLoading(false)
       }
     }
   }
@@ -273,9 +354,28 @@ const Login = ({ onClose, onLoginSuccess }) => {
           
           {/* Текст инструкции */}
           <p className="text-left mb-8 text-gray-600" style={{ fontSize: '14px' }}>
-            Мы отправили проверочный код на {email}<br />
-            Введите код, чтобы продолжить
+            {isSendingCode ? (
+              <>Отправка кода на {email}...<br />Пожалуйста, подождите</>
+            ) : (
+              <>Мы отправили проверочный код на {email}<br />Введите код, чтобы продолжить</>
+            )}
           </p>
+
+          {/* Сообщение об ошибке отправки кода */}
+          {sendCodeError && (
+            <div className="mb-4 p-3 rounded-lg" style={{ backgroundColor: '#FEE2E2', border: '1px solid #FCA5A5' }}>
+              <p className="text-left" style={{ color: '#D62828', fontSize: '14px' }}>
+                {sendCodeError}
+              </p>
+              <button
+                onClick={handleBackToLogin}
+                className="text-left mt-2 underline text-sm"
+                style={{ color: '#D62828' }}
+              >
+                Вернуться назад
+              </button>
+            </div>
+          )}
 
           {/* Поля ввода кода */}
           <div className="mb-6">
@@ -315,7 +415,9 @@ const Login = ({ onClose, onLoginSuccess }) => {
           {/* Сообщение об ошибке */}
           {codeError && (
             <p className="text-left mb-4" style={{ color: '#D62828', fontSize: '14px' }}>
-              Срок действия кода истёк. Запросите новый и попробуйте ещё раз
+              {codeErrorType === 'expired' 
+                ? 'Срок действия кода истёк. Запросите новый и попробуйте ещё раз'
+                : 'Пароли не совпадают'}
             </p>
           )}
 
@@ -324,22 +426,25 @@ const Login = ({ onClose, onLoginSuccess }) => {
             onClick={handleConfirmCode}
             className="w-full py-4 rounded-lg text-base font-medium mb-6 transition-all duration-300"
             style={{
-              backgroundColor: isCodeComplete ? '#0746A7' : '#ECEFF6',
-              color: isCodeComplete ? '#FFFFFF' : '#9AA5BB'
+              backgroundColor: isCodeComplete && !isLoading && !isSendingCode ? '#0746A7' : '#ECEFF6',
+              color: isCodeComplete && !isLoading && !isSendingCode ? '#FFFFFF' : '#9AA5BB'
             }}
-            disabled={!isCodeComplete}
+            disabled={!isCodeComplete || isLoading || isSendingCode}
             tabIndex={0}
           >
-            Подтвердить адрес
+            {isLoading ? 'Проверка...' : isSendingCode ? 'Отправка кода...' : 'Подтвердить адрес'}
           </button>
 
           {/* Сообщение о повторной отправке */}
           <p className="text-center mb-6 text-gray-600 text-sm">
             Не получили электронное письмо? Пожалуйста, проверьте папку со спамом или{' '}
-            {canResend ? (
+            {isSendingCode ? (
+              <span className="text-gray-400">отправка...</span>
+            ) : canResend ? (
               <button
                 onClick={handleResendCode}
                 className="text-vip-blue underline font-medium"
+                disabled={isSendingCode}
                 tabIndex={0}
               >
                 запросите другой код
@@ -626,13 +731,13 @@ const Login = ({ onClose, onLoginSuccess }) => {
           onClick={handleContinue}
           className="w-full py-4 rounded-lg text-base font-medium mb-6 transition-all duration-300"
           style={{
-            backgroundColor: isEmailValid ? '#0746A7' : '#ECEFF6',
-            color: isEmailValid ? '#FFFFFF' : '#9AA5BB'
+            backgroundColor: isEmailValid && !isLoading ? '#0746A7' : '#ECEFF6',
+            color: isEmailValid && !isLoading ? '#FFFFFF' : '#9AA5BB'
           }}
-          disabled={!isEmailValid}
+          disabled={!isEmailValid || isLoading}
           tabIndex={0}
         >
-          Продолжить через электронную почту
+          {isLoading ? 'Отправка...' : 'Продолжить через электронную почту'}
         </button>
 
         {/* Разделитель */}

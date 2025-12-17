@@ -221,7 +221,7 @@ const PersonalAccount = ({ userEmail, onLogout }) => {
                            <div className="h-[2px] bg-[#D9E4F8] flex-1 ml-4 mr-10 rounded-full"></div>
                         </div>
                         {/* Card */}
-                        <div className="relative h-[130px] w-[135%] -ml-0 z-10">
+                        <div className="relative h-[130px] w-[120%] -ml-0 z-10">
                            <img src={BlockIcon} className="absolute inset-0 w-full h-full object-fill" alt="bg" />
                            <div className="relative z-10 p-4 pt-6 pl-6 flex flex-col h-full justify-center">
                               <img src={StartIllustration} className="w-14 h-14 mb-2 object-contain" alt="icon" />
