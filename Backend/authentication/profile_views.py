@@ -23,7 +23,6 @@ def get_regional_db_for_user(email):
     Определяет региональную БД для пользователя.
     Пока используем дефолтную БД, в будущем можно определить по IP или другим параметрам.
     """
-    # TODO: Реализовать определение региона по IP или другим параметрам
     return 'us_canada'
 
 
@@ -34,7 +33,6 @@ def get_user_from_request(request):
     """
     email = request.data.get('email') or request.query_params.get('email')
     if not email:
-        # Можно также использовать из сессии, если есть
         email = request.session.get('user_email')
     return email
 
@@ -53,18 +51,14 @@ def get_profile(request):
                 {"error": "Email не указан"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
-        # Получаем пользователя из региональной БД
         db = get_regional_db_for_user(email)
         try:
             user = User.objects.using(db).get(email=email)
         except User.DoesNotExist:
-            # Если пользователь не существует, создаем его
             user = User.objects.using(db).create(
                 email=email,
-                is_verified=True  # Если зашел через код - значит email подтвержден
+                is_verified=True
             )
-        
         serializer = UserProfileSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
     except Exception as e:
@@ -89,21 +83,16 @@ def update_profile(request):
                 {"error": "Email не указан"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
         db = get_regional_db_for_user(email)
         try:
             user = User.objects.using(db).get(email=email)
         except User.DoesNotExist:
-            # Создаем пользователя если его нет
             user = User.objects.using(db).create(
                 email=email,
                 is_verified=True
             )
-        
-        # Частичное обновление (PATCH) или полное (PUT)
         partial = request.method == 'PATCH'
         serializer = UserProfileSerializer(user, data=request.data, partial=partial)
-        
         if serializer.is_valid():
             serializer.save()
             return Response(
@@ -146,42 +135,28 @@ def upload_profile_photo(request):
                 {"error": "Фото не предоставлено"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
         photo_file = request.FILES['photo']
-        
-        # Валидация файла
         if not photo_file.content_type.startswith('image/'):
             return Response(
                 {"error": "Файл должен быть изображением"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
-        # Ограничение размера (5MB)
         if photo_file.size > 5 * 1024 * 1024:
             return Response(
                 {"error": "Размер файла не должен превышать 5MB"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
-        # Генерируем уникальное имя файла
         file_ext = photo_file.name.split('.')[-1]
         filename = f"profile_{uuid.uuid4().hex[:12]}.{file_ext}"
-        
-        # Сохраняем файл локально (в будущем - в Google Cloud Storage)
         media_root = getattr(settings, 'MEDIA_ROOT', 'media')
         profile_dir = os.path.join(media_root, 'profile_photos')
         os.makedirs(profile_dir, exist_ok=True)
-        
         file_path = os.path.join(profile_dir, filename)
         with open(file_path, 'wb+') as destination:
             for chunk in photo_file.chunks():
                 destination.write(chunk)
-        
-        # Формируем URL (в будущем - URL из Google Cloud Storage)
         media_url = getattr(settings, 'MEDIA_URL', '/media/')
         photo_url = f"{media_url}profile_photos/{filename}"
-        
-        # Обновляем профиль пользователя
         db = get_regional_db_for_user(email)
         try:
             user = User.objects.using(db).get(email=email)
@@ -189,7 +164,6 @@ def upload_profile_photo(request):
             user = User.objects.using(db).create(email=email, is_verified=True)
         user.profile_photo_url = photo_url
         user.save(using=db)
-        
         return Response(
             {
                 "message": "Фото профиля успешно загружено",
@@ -197,7 +171,6 @@ def upload_profile_photo(request):
             },
             status=status.HTTP_200_OK
         )
-        
     except Exception as e:
         logger.error(f"Error uploading photo: {str(e)}")
         return Response(

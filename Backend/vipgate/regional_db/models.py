@@ -20,7 +20,6 @@ import string
 
 class UserManager(BaseUserManager):
     """Менеджер для модели пользователя."""
-    
     def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError('Email обязателен')
@@ -30,7 +29,6 @@ class UserManager(BaseUserManager):
             user.set_password(password)
         user.save(using=self._db)
         return user
-    
     def create_superuser(self, email, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
@@ -56,31 +54,20 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_of_birth = models.DateField(null=True, blank=True, verbose_name="Дата рождения")
     nationality = models.CharField(max_length=100, blank=True, verbose_name="Гражданство")
     profile_photo_url = models.URLField(max_length=500, blank=True, verbose_name="URL фото профиля")
-    
-    # Настройки
     language = models.CharField(max_length=10, default='ru', verbose_name="Язык")
     currency = models.CharField(max_length=3, default='USD', verbose_name="Валюта")
     notification_enabled = models.BooleanField(default=True, verbose_name="Уведомления включены")
-    
-    # Статус
     is_active = models.BooleanField(default=True, db_index=True, verbose_name="Активен")
     is_staff = models.BooleanField(default=False, verbose_name="Персонал")
     is_verified = models.BooleanField(default=False, db_index=True, verbose_name="Email подтвержден")
-    
-    # OAuth
     google_id = models.CharField(max_length=255, blank=True, null=True, unique=True, verbose_name="Google ID")
     apple_id = models.CharField(max_length=255, blank=True, null=True, unique=True, verbose_name="Apple ID")
-    
-    # Даты
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
     last_login = models.DateTimeField(null=True, blank=True)
-    
     objects = UserManager()
-    
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
-    
     class Meta:
         app_label = 'regional_db'
         db_table = 'users'
@@ -90,10 +77,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         ]
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
-    
     def __str__(self):
         return self.email
-    
     def get_full_name(self):
         return f"{self.first_name} {self.last_name}".strip()
 
@@ -117,7 +102,6 @@ class Passenger(models.Model):
     email = models.EmailField(max_length=255, blank=True, verbose_name="Email")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
     class Meta:
         app_label = 'regional_db'
         db_table = 'passengers'
@@ -126,7 +110,6 @@ class Passenger(models.Model):
         ]
         verbose_name = "Пассажир"
         verbose_name_plural = "Пассажиры"
-    
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
@@ -140,7 +123,6 @@ class Order(models.Model):
         ('cancelled', 'Отменен'),
         ('refunded', 'Возвращен'),
     ]
-    
     order_number = models.CharField(
         max_length=50,
         unique=True,
@@ -184,7 +166,6 @@ class Order(models.Model):
     cancelled_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата отмены")
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
     class Meta:
         app_label = 'regional_db'
         db_table = 'orders'
@@ -196,7 +177,6 @@ class Order(models.Model):
         ordering = ['-created_at']
         verbose_name = "Заказ"
         verbose_name_plural = "Заказы"
-    
     def __str__(self):
         return f"{self.order_number} - {self.user.email}"
 
@@ -210,7 +190,6 @@ class Payment(models.Model):
         ('google_pay', 'Google Pay'),
         ('bonus', 'Бонусы'),
     ]
-    
     STATUS_CHOICES = [
         ('pending', 'Ожидает оплаты'),
         ('processing', 'Обрабатывается'),
@@ -218,7 +197,6 @@ class Payment(models.Model):
         ('failed', 'Ошибка'),
         ('refunded', 'Возвращен'),
     ]
-    
     order = models.ForeignKey(
         Order,
         on_delete=models.PROTECT,
@@ -254,7 +232,6 @@ class Payment(models.Model):
     paid_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата оплаты")
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
     class Meta:
         app_label = 'regional_db'
         db_table = 'payments'
@@ -266,7 +243,6 @@ class Payment(models.Model):
         ordering = ['-created_at']
         verbose_name = "Платеж"
         verbose_name_plural = "Платежи"
-    
     def __str__(self):
         return f"{self.order.order_number} - {self.amount} {self.currency}"
 
@@ -279,7 +255,6 @@ class BonusTransaction(models.Model):
         ('referral', 'За реферала'),
         ('spent', 'Потрачено'),
     ]
-    
     user = models.ForeignKey(
         User,
         on_delete=models.PROTECT,
@@ -314,7 +289,6 @@ class BonusTransaction(models.Model):
         verbose_name="Реферал"
     )
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
-    
     class Meta:
         app_label = 'regional_db'
         db_table = 'bonus_transactions'
@@ -325,7 +299,6 @@ class BonusTransaction(models.Model):
         ordering = ['-created_at']
         verbose_name = "Бонусная транзакция"
         verbose_name_plural = "Бонусные транзакции"
-    
     def __str__(self):
         return f"{self.user.email} - {self.transaction_type} - {self.amount}"
 
@@ -358,13 +331,11 @@ class BonusBalance(models.Model):
         verbose_name="Всего потрачено"
     )
     updated_at = models.DateTimeField(auto_now=True)
-    
     class Meta:
         app_label = 'regional_db'
         db_table = 'bonus_balances'
         verbose_name = "Баланс бонусов"
         verbose_name_plural = "Балансы бонусов"
-    
     def __str__(self):
         return f"{self.user.email} - {self.current_balance}"
 
@@ -377,14 +348,12 @@ class SupportTicket(models.Model):
         ('resolved', 'Решен'),
         ('closed', 'Закрыт'),
     ]
-    
     PRIORITY_CHOICES = [
         ('low', 'Низкий'),
         ('medium', 'Средний'),
         ('high', 'Высокий'),
         ('urgent', 'Срочный'),
     ]
-    
     ticket_number = models.CharField(
         max_length=50,
         unique=True,
@@ -417,7 +386,6 @@ class SupportTicket(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
     closed_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата закрытия")
-    
     class Meta:
         app_label = 'regional_db'
         db_table = 'support_tickets'
@@ -428,7 +396,6 @@ class SupportTicket(models.Model):
         ordering = ['-created_at']
         verbose_name = "Тикет поддержки"
         verbose_name_plural = "Тикеты поддержки"
-    
     def __str__(self):
         return f"{self.ticket_number} - {self.subject}"
 
@@ -446,7 +413,6 @@ class TicketMessage(models.Model):
     is_from_admin = models.BooleanField(default=False, verbose_name="От администратора")
     sender_name = models.CharField(max_length=255, verbose_name="Имя отправителя")
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
-    
     class Meta:
         app_label = 'regional_db'
         db_table = 'ticket_messages'
@@ -456,7 +422,6 @@ class TicketMessage(models.Model):
         ordering = ['created_at']
         verbose_name = "Сообщение в тикете"
         verbose_name_plural = "Сообщения в тикетах"
-    
     def __str__(self):
         return f"{self.ticket.ticket_number} - {self.sender_name}"
 
@@ -471,7 +436,6 @@ class Notification(models.Model):
         ('support_reply', 'Ответ в поддержке'),
         ('system', 'Системное'),
     ]
-    
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -491,7 +455,6 @@ class Notification(models.Model):
     is_read = models.BooleanField(default=False, db_index=True, verbose_name="Прочитано")
     read_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата прочтения")
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
-    
     class Meta:
         app_label = 'regional_db'
         db_table = 'notifications'
@@ -502,7 +465,6 @@ class Notification(models.Model):
         ordering = ['-created_at']
         verbose_name = "Уведомление"
         verbose_name_plural = "Уведомления"
-    
     def __str__(self):
         return f"{self.user.email} - {self.title}"
 
@@ -525,16 +487,13 @@ class ReferralCode(models.Model):
     is_active = models.BooleanField(default=True, db_index=True, verbose_name="Активен")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
     class Meta:
         app_label = 'regional_db'
         db_table = 'referral_codes'
         verbose_name = "Реферальный код"
         verbose_name_plural = "Реферальные коды"
-    
     def __str__(self):
         return f"{self.user.email} - {self.code}"
-    
     @staticmethod
     def generate_code():
         """Генерирует уникальный реферальный код."""
@@ -565,7 +524,6 @@ class Referral(models.Model):
         verbose_name="Реферальный код"
     )
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
-    
     class Meta:
         app_label = 'regional_db'
         db_table = 'referrals'
@@ -574,7 +532,6 @@ class Referral(models.Model):
         ]
         verbose_name = "Реферальная связь"
         verbose_name_plural = "Реферальные связи"
-    
     def __str__(self):
         return f"{self.referrer.email} -> {self.referred_user.email}"
 

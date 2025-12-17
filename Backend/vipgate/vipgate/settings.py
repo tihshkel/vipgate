@@ -8,27 +8,27 @@ import os
 from django.core.exceptions import ImproperlyConfigured
 import environ
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 
-# Инициализация environ
+
 env = environ.Env(
     DEBUG=(bool, False),
     SECRET_KEY=(str, ''),
 )
 
-# Чтение .env файла
+
 environ.Env.read_env(BASE_DIR / '.env')
 
-# SECURITY WARNING: keep the secret key used in production secret!
+
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-!6a9h6b(!yk3kza$vubwgm^-cr_u5!uxno^zwbi@#v!hh07@1w')
 
-# SECURITY WARNING: don't run with debug turned on in production!
+
 DEBUG = env('DEBUG', default=True)
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
 
-# Application definition
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -36,22 +36,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
-    # Third party apps
     'rest_framework',
     'corsheaders',
-    # 'storages',  # Для Google Cloud Storage (установите django-storages если нужно)
-    
-    # Local apps
     'vipgate.global_db',
     'vipgate.regional_db',
     'authentication',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # CORS должен быть ПЕРВЫМ
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',  # Для админ-панели
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -80,16 +75,15 @@ TEMPLATES = [
 WSGI_APPLICATION = 'vipgate.wsgi.application'
 ASGI_APPLICATION = 'vipgate.asgi.application'
 
-# Database
-# Множественные базы данных: центральная (global) и региональные
-# Для разработки: SQLite3 (по умолчанию)
-# Для продакшена: PostgreSQL (настраивается через .env)
 
-# Определяем, используем ли PostgreSQL или SQLite
+
+
+
+
+
 USE_POSTGRESQL = env.bool('USE_POSTGRESQL', default=False)
 
 if USE_POSTGRESQL:
-    # Конфигурация для PostgreSQL (продакшен)
     DATABASES = {
         'default': {
             'ENGINE': env('DB_ENGINE', default='django.db.backends.postgresql'),
@@ -103,7 +97,6 @@ if USE_POSTGRESQL:
             },
             'CONN_MAX_AGE': 600,
         },
-        # Центральная база данных (Global Database)
         'global': {
             'ENGINE': env('GLOBAL_DB_ENGINE', default='django.db.backends.postgresql'),
             'NAME': env('GLOBAL_DB_NAME', default='vipgate_global'),
@@ -116,7 +109,6 @@ if USE_POSTGRESQL:
             },
             'CONN_MAX_AGE': 600,
         },
-        # Региональные базы данных
         'us_canada': {
             'ENGINE': env('REGIONAL_DB_ENGINE', default='django.db.backends.postgresql'),
             'NAME': env('US_CANADA_DB_NAME', default='vipgate_us_canada'),
@@ -179,18 +171,15 @@ if USE_POSTGRESQL:
         },
     }
 else:
-    # Конфигурация для SQLite3 (разработка)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db_default.sqlite3',
         },
-        # Центральная база данных (Global Database)
         'global': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db_global.sqlite3',
         },
-        # Региональные базы данных
         'us_canada': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db_us_canada.sqlite3',
@@ -213,10 +202,10 @@ else:
         },
     }
 
-# Database Router
+
 DATABASE_ROUTERS = ['vipgate.vipgate.db_router.GlobalRegionalRouter']
 
-# Password validation
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -232,26 +221,26 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Internationalization
+
 LANGUAGE_CODE = 'ru-ru'
 TIME_ZONE = 'Europe/Moscow'
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
+
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Default primary key field type
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Custom User Model
+
 AUTH_USER_MODEL = 'regional_db.User'
 
-# REST Framework settings
+
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
@@ -268,16 +257,15 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'anon': '100/hour',
     },
-    # Отключаем CSRF для API
     'DEFAULT_AUTHENTICATION_CLASSES': [],
 }
 
-# Frontend and Backend URLs
+
 FRONTEND_URL = env('FRONTEND_URL', default='http://localhost:5173')
 BACKEND_URL = env('BACKEND_URL', default='http://localhost:8000')
 
-# CORS settings
-# Для разработки разрешаем все origins (без credentials)
+
+
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
     CORS_ALLOW_CREDENTIALS = False
@@ -298,7 +286,7 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
 ]
 
-# Email settings
+
 EMAIL_BACKEND = env('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = env('EMAIL_HOST', default='smtp.gmail.com')
 EMAIL_PORT = env.int('EMAIL_PORT', default=587)
@@ -308,7 +296,7 @@ EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='noreply@vipgate.com')
 
-# Celery Configuration
+
 CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND', default='redis://localhost:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']
@@ -316,21 +304,20 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
-CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 минут
-CELERY_TASK_SOFT_TIME_LIMIT = 25 * 60  # 25 минут
-CELERY_WORKER_PREFETCH_MULTIPLIER = 4  # Оптимизация для async
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_TASK_SOFT_TIME_LIMIT = 25 * 60
+CELERY_WORKER_PREFETCH_MULTIPLIER = 4
 CELERY_TASK_ACKS_LATE = True
 CELERY_TASK_REJECT_ON_WORKER_LOST = True
 
-# Исправление для Windows: используем solo pool вместо процессов
-# Это устраняет PermissionError при работе с multiprocessing на Windows
+
+
 import sys
 if sys.platform.startswith('win'):
     CELERY_WORKER_POOL = 'solo'
-    # Отключаем prefetch для solo pool
     CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 
-# Redis Cache Configuration
+
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
@@ -347,14 +334,14 @@ CACHES = {
     }
 }
 
-# Session configuration (используем Redis)
+
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 SESSION_CACHE_ALIAS = 'default'
 
-# Logging
+
 import os
 logs_dir = BASE_DIR / 'logs'
-os.makedirs(logs_dir, exist_ok=True)  # Создаем папку logs если её нет
+os.makedirs(logs_dir, exist_ok=True)
 
 LOGGING = {
     'version': 1,
@@ -394,26 +381,24 @@ LOGGING = {
     },
 }
 
-# Google Cloud Storage settings
+
 USE_GCS = env.bool('USE_GCS', default=False)
 if USE_GCS:
     DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
     GS_BUCKET_NAME = env('GS_BUCKET_NAME', default='vipgate-media')
     GS_PROJECT_ID = env('GS_PROJECT_ID', default='')
-    GS_CREDENTIALS = env('GS_CREDENTIALS', default=None)  # Path to JSON credentials
+    GS_CREDENTIALS = env('GS_CREDENTIALS', default=None)
     GS_DEFAULT_ACL = 'publicRead'
     GS_FILE_OVERWRITE = False
-    # CDN URL для быстрой доставки контента
     MEDIA_URL = env('CDN_MEDIA_URL', default=f'https://storage.googleapis.com/{GS_BUCKET_NAME}/')
 else:
-    # Локальное хранилище для разработки
     MEDIA_URL = '/media/'
     MEDIA_ROOT = BASE_DIR / 'media'
 
-# Frontend and Backend URLs (для использования в коде)
-# Доступны через settings.FRONTEND_URL и settings.BACKEND_URL
 
-# Security settings (для продакшена)
+
+
+
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True

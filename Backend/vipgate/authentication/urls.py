@@ -12,7 +12,7 @@ urlpatterns = [
     path('verify-code/', views.verify_code, name='verify_code'),
 ]
 
-# Тестовый endpoint для проверки CORS
+
 @csrf_exempt
 @api_view(['GET', 'OPTIONS'])
 @permission_classes([AllowAny])
@@ -20,6 +20,6 @@ def test_cors(request):
     """Тестовый endpoint для проверки CORS"""
     return Response({'message': 'CORS работает!', 'status': 'ok'})
 
-# Добавляем тестовый endpoint
+
 urlpatterns.append(path('test/', test_cors, name='test_cors'))
 

@@ -42,10 +42,9 @@ def send_verification_code_email(self, email: str, code: str):
 
     except Exception as exc:
         logger.error(f"Failed to send verification code to {email}: {str(exc)}")
-        # Retry с экспоненциальной задержкой
         raise self.retry(exc=exc)
 
 
-# Задача cleanup_expired_codes больше не нужна
-# Redis автоматически удаляет записи с истекшим TTL
+
+
 

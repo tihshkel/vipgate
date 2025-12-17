@@ -21,7 +21,6 @@ class Region(models.Model):
         ('south_america', 'Южная Америка'),
         ('middle_east', 'Ближний Восток'),
     ]
-    
     code = models.CharField(
         max_length=20,
         choices=REGION_CHOICES,
@@ -34,13 +33,11 @@ class Region(models.Model):
     is_active = models.BooleanField(default=True, verbose_name="Активен")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
     class Meta:
         app_label = 'global_db'
         db_table = 'regions'
         verbose_name = "Регион"
         verbose_name_plural = "Регионы"
-    
     def __str__(self):
         return self.name
 
@@ -67,7 +64,6 @@ class UserRegistry(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
     last_login = models.DateTimeField(null=True, blank=True)
-    
     class Meta:
         app_label = 'global_db'
         db_table = 'user_registry'
@@ -77,7 +73,6 @@ class UserRegistry(models.Model):
         ]
         verbose_name = "Пользователь (реестр)"
         verbose_name_plural = "Реестр пользователей"
-    
     def __str__(self):
         return f"{self.email} ({self.region.name})"
 
@@ -124,7 +119,6 @@ class Airport(models.Model):
     is_active = models.BooleanField(default=True, db_index=True, verbose_name="Активен")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
     class Meta:
         app_label = 'global_db'
         db_table = 'airports'
@@ -135,7 +129,6 @@ class Airport(models.Model):
         verbose_name = "Аэропорт"
         verbose_name_plural = "Аэропорты"
         ordering = ['name']
-    
     def __str__(self):
         return f"{self.name} ({self.iata_code})"
 
@@ -154,7 +147,6 @@ class Terminal(models.Model):
     is_active = models.BooleanField(default=True, verbose_name="Активен")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
     class Meta:
         app_label = 'global_db'
         db_table = 'terminals'
@@ -164,7 +156,6 @@ class Terminal(models.Model):
         ]
         verbose_name = "Терминал"
         verbose_name_plural = "Терминалы"
-    
     def __str__(self):
         return f"{self.airport.name} - {self.name}"
 
@@ -177,14 +168,12 @@ class ServiceType(models.Model):
     is_active = models.BooleanField(default=True, db_index=True, verbose_name="Активен")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
     class Meta:
         app_label = 'global_db'
         db_table = 'service_types'
         verbose_name = "Тип услуги"
         verbose_name_plural = "Типы услуг"
         ordering = ['name']
-    
     def __str__(self):
         return self.name
 
@@ -224,7 +213,6 @@ class Service(models.Model):
     is_active = models.BooleanField(default=True, db_index=True, verbose_name="Активен")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
     class Meta:
         app_label = 'global_db'
         db_table = 'services'
@@ -234,7 +222,6 @@ class Service(models.Model):
         ]
         verbose_name = "Услуга"
         verbose_name_plural = "Услуги"
-    
     def __str__(self):
         return f"{self.name} - {self.airport.name}"
 
@@ -247,14 +234,12 @@ class FAQ(models.Model):
     is_active = models.BooleanField(default=True, db_index=True, verbose_name="Активен")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
     class Meta:
         app_label = 'global_db'
         db_table = 'faqs'
         ordering = ['order', 'id']
         verbose_name = "FAQ"
         verbose_name_plural = "FAQ"
-    
     def __str__(self):
         return self.question[:50]
 
@@ -267,13 +252,11 @@ class InformationPage(models.Model):
     is_active = models.BooleanField(default=True, verbose_name="Активен")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
     class Meta:
         app_label = 'global_db'
         db_table = 'information_pages'
         verbose_name = "Информационная страница"
         verbose_name_plural = "Информационные страницы"
-    
     def __str__(self):
         return self.title
 
@@ -289,7 +272,6 @@ class Article(models.Model):
     published_at = models.DateTimeField(null=True, blank=True, verbose_name="Дата публикации")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
     class Meta:
         app_label = 'global_db'
         db_table = 'articles'
@@ -299,7 +281,6 @@ class Article(models.Model):
         ordering = ['-published_at', '-created_at']
         verbose_name = "Статья"
         verbose_name_plural = "Статьи"
-    
     def __str__(self):
         return self.title
 
@@ -313,7 +294,6 @@ class AdminActionLog(models.Model):
     details = models.JSONField(default=dict, verbose_name="Детали")
     ip_address = models.GenericIPAddressField(null=True, blank=True, verbose_name="IP адрес")
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
-    
     class Meta:
         app_label = 'global_db'
         db_table = 'admin_action_logs'
@@ -324,7 +304,6 @@ class AdminActionLog(models.Model):
         ordering = ['-created_at']
         verbose_name = "Лог действий администратора"
         verbose_name_plural = "Логи действий администраторов"
-    
     def __str__(self):
         return f"{self.admin_user} - {self.action} - {self.created_at}"
 
@@ -367,7 +346,6 @@ class GlobalReferral(models.Model):
     is_active = models.BooleanField(default=True, db_index=True, verbose_name="Активен")
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
     class Meta:
         app_label = 'global_db'
         db_table = 'global_referrals'
@@ -380,6 +358,5 @@ class GlobalReferral(models.Model):
         verbose_name = "Глобальная реферальная связь"
         verbose_name_plural = "Глобальная реферальная система"
         ordering = ['-created_at']
-    
     def __str__(self):
         return f"{self.referrer_email} ({self.referrer_region.name}) -> {self.referred_email} ({self.referred_region.name})"

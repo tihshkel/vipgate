@@ -13,7 +13,6 @@ class UserAdmin(BaseUserAdmin):
     list_filter = ('is_active', 'is_verified', 'is_staff', 'created_at')
     search_fields = ('email', 'first_name', 'last_name', 'phone')
     ordering = ('-created_at',)
-    
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         ('Персональная информация', {'fields': ('first_name', 'last_name', 'phone')}),
@@ -22,11 +21,8 @@ class UserAdmin(BaseUserAdmin):
         ('OAuth', {'fields': ('google_id', 'apple_id')}),
         ('Даты', {'fields': ('last_login', 'created_at', 'updated_at')}),
     )
-    
     readonly_fields = ('created_at', 'updated_at', 'last_login')
-    
     def region_display(self, obj):
-        # Получаем регион из центральной БД
         from vipgate.global_db.models import UserRegistry
         try:
             registry = UserRegistry.objects.using('global').get(email=obj.email)

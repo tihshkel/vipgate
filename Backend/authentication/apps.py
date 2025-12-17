@@ -7,4 +7,4 @@ class AuthenticationConfig(AppConfig):
     verbose_name = 'Аутентификация'
 
     def ready(self):
-        import authentication.signals  # noqa
+        import authentication.signals
