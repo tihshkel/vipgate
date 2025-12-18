@@ -110,7 +110,7 @@ export const mockVerifyCode = async (email, enteredCode) => {
       ok: false,
       status: 400,
       json: async () => ({
-        error: 'Пароли не совпадают',
+        error: 'Неверный код. Попробуйте ещё раз',
         error_type: 'invalid_code',
         remaining_attempts: remainingAttempts
       })

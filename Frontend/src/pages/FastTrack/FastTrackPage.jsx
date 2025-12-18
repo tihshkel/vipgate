@@ -12,18 +12,18 @@ import airportPhoto4 from '../../../airport-photo4.jpg'
 import airportPhoto from '../../assets/photo-fast.png'
 
 const StepCard = ({ number, title, description, icon }) => (
-  <div className="relative w-full h-full min-h-[260px] px-8 pt-16 pb-6 flex flex-col group">
+  <div className="relative w-full h-[260px] px-8 pt-16 pb-6 flex flex-col group">
     {/* Background SVG */}
     <div className="absolute inset-0 w-full h-full z-0 select-none pointer-events-none">
         <img src={blockBg} alt="" className="w-full h-full" style={{ objectFit: 'fill' }} />
     </div>
 
     {/* Content */}
-    <div className="relative z-10 flex flex-col h-full items-start">
-        <div className="flex justify-start mb-2 h-14 items-center ml-0">
-            <img src={icon} alt={title} className="max-h-full w-auto object-contain" />
+    <div className="relative z-10 flex flex-col h-full items-start -ml-2">
+        <div className="flex justify-start mb-2 h-16 items-center -ml-2">
+            <img src={icon} alt={title} className="max-h-full w-auto object-contain scale-110" />
         </div>
-        <div>
+        <div className="-ml-2">
             <h3 className="text-xl font-bold text-vip-blue mb-2">{title}</h3>
             <p className="text-[#002C6E] text-opacity-80 text-sm leading-relaxed max-w-[95%]">{description}</p>
         </div>
@@ -66,7 +66,7 @@ const AccordionItem = ({ question, answer, isOpen, onClick }) => (
       className="w-full py-4 flex justify-between items-center text-left focus:outline-none"
       onClick={onClick}
     >
-      <span className="font-medium text-gray-900 pr-4">{question}</span>
+      <span className="font-medium pr-4" style={{ color: '#002C6E' }}>{question}</span>
       <span className={`transform transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
         <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M1.41 0.589996L6 5.17L10.59 0.589996L12 2L6 8L0 2L1.41 0.589996Z" fill="#005AA8"/>
@@ -76,7 +76,7 @@ const AccordionItem = ({ question, answer, isOpen, onClick }) => (
     <div 
       className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-96 opacity-100 mb-4' : 'max-h-0 opacity-0'}`}
     >
-      <p className="text-gray-600 text-sm leading-relaxed">{answer}</p>
+      <p className="text-sm leading-relaxed" style={{ color: '#002C6E' }}>{answer}</p>
     </div>
   </div>
 )
@@ -176,7 +176,7 @@ const FastTrackPage = () => {
               Доступно в 450+ аэропортах
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-vip-blue">Fast Track</h1>
-            <p className="text-lg md:text-xl text-[#809DCA] leading-relaxed max-w-xl">
+            <p className="font-semibold leading-relaxed max-w-xl" style={{ fontSize: '16px', color: '#809DCA' }}>
               Услуга ускоренного прохождения формальностей в аэропорту: отдельные коридоры и стойки для регистрации, контроля безопасности и паспортного контроля. Вы избегаете очередей, экономите время и путешествуете комфортнее, сохраняя спокойствие даже в часы пик.
             </p>
             <button className="bg-vip-blue text-white px-8 md:px-12 py-3 md:py-4 text-base md:text-lg font-semibold rounded-[6px] hover:bg-opacity-90 transition-all shadow-none">
@@ -195,14 +195,14 @@ const FastTrackPage = () => {
       {/* Steps Section */}
       <section className="container mx-auto px-4 md:px-8 py-12">
         {/* Steps Indicator */}
-        <div className="hidden md:grid grid-cols-3 gap-6 mb-8 relative">
+        <div className="hidden md:grid grid-cols-3 gap-6 mb-1 relative">
           {/* Connecting Line */}
           <div className="absolute top-1/2 left-0 w-full h-[1px] bg-[#D9E4F8] -translate-y-1/2 z-0" />
           
           {steps.map((_, idx) => (
             <div key={idx} className="relative z-10 flex justify-start">
               <div className="bg-[#FFB700] text-white flex items-center gap-2 px-4 py-1.5 rounded-lg shadow-sm ring-8 ring-white">
-                <img src={starIcon} alt="" className="w-4 h-4 brightness-0 invert" />
+                <img src={starIcon} alt="" className="brightness-0 invert" style={{ width: '20px', height: '20px' }} />
                 <span className="text-sm font-bold">Шаг {idx + 1}</span>
               </div>
             </div>

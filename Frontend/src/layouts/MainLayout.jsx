@@ -2,6 +2,7 @@ import React from 'react'
 import { Outlet } from 'react-router-dom'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
+import Breadcrumbs from '../components/layout/Breadcrumbs'
 
 const MainLayout = ({ onLoginClick, isLoggedIn, userEmail, onLogout }) => {
   return (
@@ -12,6 +13,7 @@ const MainLayout = ({ onLoginClick, isLoggedIn, userEmail, onLogout }) => {
         userEmail={userEmail} 
         onLogout={onLogout} 
       />
+      <Breadcrumbs />
       <main>
         <Outlet />
       </main>

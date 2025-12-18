@@ -3,7 +3,7 @@
 // true = работа БЕЗ бэкенда (mock данные)
 // false = работа С бэкендом (реальный API)
 
-const USE_MOCK = false  // ← ИЗМЕНИТЕ НА false ДЛЯ РАБОТЫ С БЭКЕНДОМ
+const USE_MOCK = true  // ← ИЗМЕНИТЕ НА false ДЛЯ РАБОТЫ С БЭКЕНДОМ
 
 export const API_CONFIG = {
   MOCK_MODE: USE_MOCK,

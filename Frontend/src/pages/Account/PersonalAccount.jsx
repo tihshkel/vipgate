@@ -45,7 +45,7 @@ const PersonalAccount = ({ userEmail, onLogout }) => {
   const userInitial = userEmail ? userEmail.charAt(0).toUpperCase() : 'A'
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#F5F7FA' }}>
+    <div className="min-h-screen bg-white">
       {/* Хедер */}
       <header className="bg-vip-blue text-white px-4 md:px-8 py-4 sticky top-0 z-50">
         <div className="container mx-auto max-w-[1440px]">
@@ -66,43 +66,46 @@ const PersonalAccount = ({ userEmail, onLogout }) => {
             </div>
           </div>
 
-          {/* Десктопная версия */}
-          <div className="hidden lg:flex items-center justify-between">
-            <div className="text-xl md:text-2xl font-bold">Vipgate.com</div>
-            <div className="flex items-center gap-3 md:gap-6">
-              <nav className="flex items-center gap-6 xl:gap-8">
-                <a href="#" className="flex items-center gap-2 hover:text-vip-gold transition-colors text-sm">
-                  <FastTrackIcon className="w-4 h-4" />
-                  <span>Fast Track</span>
-                </a>
-                <a href="#" className="flex items-center gap-2 hover:text-vip-gold transition-colors text-sm">
-                  <ChairIcon className="w-4 h-4" />
-                  <span>VIP lounge</span>
-                </a>
-                <a href="#" className="flex items-center gap-2 hover:text-vip-gold transition-colors text-sm">
-                  <CarIcon className="w-4 h-4" />
-                  <span>Transfer</span>
-                </a>
-                <a href="#" className="flex items-center gap-2 hover:text-vip-gold transition-colors text-sm">
-                  <PeopleIcon className="w-4 h-4" />
-                  <span>Meet & assist</span>
-                </a>
-              </nav>
-              <div className="flex items-center gap-3 md:gap-6">
+          {/* Десктопная версия - два ряда */}
+          <div className="hidden lg:flex flex-col gap-3">
+            {/* Верхний ряд */}
+            <div className="flex items-center justify-between">
+              {/* Логотип */}
+              <Link to="/" className="text-xl md:text-2xl font-bold flex-shrink-0 hover:text-vip-gold transition-colors">Vipgate.com</Link>
+
+              {/* Правая часть верхнего ряда */}
+              <div className="flex items-center gap-3 xl:gap-4 flex-shrink-0">
+                {/* Валюта */}
                 <div className="flex items-center gap-2 text-sm">
-                  <RussianFlagIcon className="w-8 h-6" />
                   <span>RUB</span>
                 </div>
-                <button 
-                  className="w-5 h-5 flex items-center justify-center hover:text-vip-gold transition-colors"
-                  aria-label="Помощь"
-                  tabIndex={0}
-                >
-                  <QuestionIcon className="w-5 h-5" />
-                </button>
+
+                {/* Язык */}
+                <div className="flex items-center gap-2 text-sm">
+                  <RussianFlagIcon className="w-5 h-5" />
+                </div>
+
+                {/* Иконки */}
+                <div className="flex items-center gap-2">
+                  <button 
+                    className="hover:text-vip-gold transition-colors w-8 h-8 flex items-center justify-center" 
+                    aria-label="Помощь"
+                    tabIndex={0}
+                  >
+                    <QuestionIcon className="w-5 h-5" />
+                  </button>
+                  <button 
+                    className="hover:text-vip-gold transition-colors w-8 h-8 flex items-center justify-center" 
+                    aria-label="Чат"
+                    tabIndex={0}
+                  >
+                    <ChatIcon className="w-5 h-5" />
+                  </button>
+                </div>
+
                 {/* Иконка колокольчика */}
                 <button 
-                  className="w-5 h-5 flex items-center justify-center hover:text-vip-gold transition-colors relative"
+                  className="hover:text-vip-gold transition-colors w-8 h-8 flex items-center justify-center relative"
                   aria-label="Уведомления"
                   tabIndex={0}
                 >
@@ -110,6 +113,7 @@ const PersonalAccount = ({ userEmail, onLogout }) => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                   </svg>
                 </button>
+
                 {/* Круглая кнопка с первой буквой и выпадающее меню */}
                 <div className="relative">
                   <div className="flex flex-col items-center gap-0 cursor-pointer" onClick={() => setShowProfileMenu(!showProfileMenu)}>
@@ -161,15 +165,40 @@ const PersonalAccount = ({ userEmail, onLogout }) => {
                     </>
                   )}
                 </div>
-                <button 
-                  className="bg-vip-blue border border-white text-white px-3 md:px-5 py-2 rounded text-xs md:text-sm font-medium flex items-center gap-2 hover:bg-opacity-90 transition-colors whitespace-nowrap"
-                  tabIndex={0}
-                >
-                  <DownloadIcon className="w-4 h-4" />
-                  <span className="hidden md:inline">Скачать приложение</span>
-                  <span className="md:hidden">Скачать</span>
-                </button>
               </div>
+            </div>
+
+            {/* Нижний ряд */}
+            <div className="flex items-center justify-between">
+              {/* Навигация */}
+              <nav className="flex items-center gap-4 xl:gap-8 overflow-x-auto scrollbar-hide">
+                <a href="#" className="flex items-center gap-2 hover:text-vip-gold transition-colors text-sm xl:text-base whitespace-nowrap text-white px-3 py-1.5 rounded-lg">
+                  <FastTrackIcon className="w-4 h-4 xl:w-5 xl:h-5" />
+                  <span>Fast Track</span>
+                </a>
+                <a href="#" className="flex items-center gap-2 hover:text-vip-gold transition-colors text-sm xl:text-base whitespace-nowrap text-white px-3 py-1.5 rounded-lg">
+                  <ChairIcon className="w-4 h-4 xl:w-5 xl:h-5" />
+                  <span>VIP lounge</span>
+                </a>
+                <a href="#" className="flex items-center gap-2 hover:text-vip-gold transition-colors text-sm xl:text-base whitespace-nowrap text-white px-3 py-1.5 rounded-lg">
+                  <CarIcon className="w-4 h-4 xl:w-5 xl:h-5" />
+                  <span>Transfer</span>
+                </a>
+                <a href="#" className="flex items-center gap-2 hover:text-vip-gold transition-colors text-sm xl:text-base whitespace-nowrap text-white px-3 py-1.5 rounded-lg">
+                  <PeopleIcon className="w-4 h-4 xl:w-5 xl:h-5" />
+                  <span>Meet & assist</span>
+                </a>
+              </nav>
+
+              {/* Кнопка скачивания приложения */}
+              <button 
+                className="bg-vip-blue border border-white text-white px-4 xl:px-6 py-2.5 rounded-lg text-sm xl:text-base font-medium flex items-center justify-center gap-2 hover:bg-opacity-90 transition-colors whitespace-nowrap w-[220px] xl:w-[250px]"
+                tabIndex={0}
+              >
+                <DownloadIcon className="w-4 h-4" />
+                <span className="hidden xl:inline">Скачать приложение</span>
+                <span className="xl:hidden">Скачать</span>
+              </button>
             </div>
           </div>
         </div>
@@ -221,7 +250,7 @@ const PersonalAccount = ({ userEmail, onLogout }) => {
                            <div className="h-[2px] bg-[#D9E4F8] flex-1 ml-4 mr-10 rounded-full"></div>
                         </div>
                         {/* Card */}
-                        <div className="relative h-[130px] w-[120%] -ml-0 z-10">
+                        <div className="relative h-[130px] w-[120%] -ml-4 z-10">
                            <img src={BlockIcon} className="absolute inset-0 w-full h-full object-fill" alt="bg" />
                            <div className="relative z-10 p-4 pt-6 pl-6 flex flex-col h-full justify-center">
                               <img src={StartIllustration} className="w-14 h-14 mb-2 object-contain" alt="icon" />
@@ -320,7 +349,7 @@ const PersonalAccount = ({ userEmail, onLogout }) => {
               {/* How Points Work Box */}
               <div className="border-2 border-[#002C6E] rounded-md p-8">
                 <h3 className="text-xl font-bold text-[#002C6E] mb-6">Как работают баллы</h3>
-                <ul className="space-y-4 text-[#002C6E] text-base">
+                <ul className="space-y-2 text-[#002C6E]" style={{ fontSize: '16px' }}>
                   <li className="flex items-start gap-3">
                     <span className="mt-2 w-1.5 h-1.5 rounded-full bg-[#002C6E] flex-shrink-0"></span>
                     <span className="leading-tight">10 баллов за каждые 100 ₽</span>
@@ -359,7 +388,7 @@ const PersonalAccount = ({ userEmail, onLogout }) => {
             {/* Top Row - 4 sections */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Мои путешествия */}
-            <div className="border border-gray-200 rounded-xl p-6 bg-[#F1F7FF] shadow-sm hover:shadow-md transition-shadow">
+            <div className="border border-gray-200 rounded-xl p-6 bg-[#F1F7FF]">
               <h3 className="text-lg font-semibold text-vip-blue mb-4">Мои путешествия</h3>
               <div className="space-y-3">
                 <a href="#" className="flex items-center justify-between group hover:text-vip-blue transition-colors text-[#002C6E]">
@@ -393,7 +422,7 @@ const PersonalAccount = ({ userEmail, onLogout }) => {
             </div>
 
             {/* Платежная информация */}
-            <div className="border border-gray-200 rounded-xl p-6 bg-[#F1F7FF] shadow-sm hover:shadow-md transition-shadow">
+            <div className="border border-gray-200 rounded-xl p-6 bg-[#F1F7FF]">
               <h3 className="text-lg font-semibold text-vip-blue mb-4">Платежная информация</h3>
               <div className="space-y-3">
                 <a href="#" className="flex items-center justify-between group hover:text-vip-blue transition-colors text-[#002C6E]">
@@ -427,7 +456,7 @@ const PersonalAccount = ({ userEmail, onLogout }) => {
             </div>
 
             {/* Управление аккаунтом */}
-            <div className="border border-gray-200 rounded-xl p-6 bg-[#F1F7FF] shadow-sm hover:shadow-md transition-shadow">
+            <div className="border border-gray-200 rounded-xl p-6 bg-[#F1F7FF]">
               <h3 className="text-lg font-semibold text-vip-blue mb-4">Управление аккаунтом</h3>
               <div className="space-y-3">
                 <a href="#" className="flex items-center justify-between group hover:text-vip-blue transition-colors text-[#002C6E]">
@@ -452,7 +481,7 @@ const PersonalAccount = ({ userEmail, onLogout }) => {
             </div>
 
             {/* Помощь */}
-            <div className="border border-gray-200 rounded-xl p-6 bg-[#F1F7FF] shadow-sm hover:shadow-md transition-shadow">
+            <div className="border border-gray-200 rounded-xl p-6 bg-[#F1F7FF]">
               <h3 className="text-lg font-semibold text-vip-blue mb-4">Помощь</h3>
               <div className="space-y-3">
                 <a href="#" className="flex items-center justify-between group hover:text-vip-blue transition-colors text-[#002C6E]">
@@ -489,7 +518,7 @@ const PersonalAccount = ({ userEmail, onLogout }) => {
             {/* Bottom Row - 2 sections */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Юридические данные */}
-              <div className="border border-gray-200 rounded-xl p-6 bg-[#F1F7FF] shadow-sm hover:shadow-md transition-shadow">
+              <div className="border border-gray-200 rounded-xl p-6 bg-[#F1F7FF]">
                 <h3 className="text-lg font-semibold text-vip-blue mb-4">Юридические данные</h3>
                 <div className="space-y-3">
                   <a href="#" className="flex items-center justify-between group hover:text-vip-blue transition-colors text-[#002C6E]">
@@ -505,7 +534,7 @@ const PersonalAccount = ({ userEmail, onLogout }) => {
               </div>
 
               {/* Настройки */}
-              <div className="border border-gray-200 rounded-xl p-6 bg-[#F1F7FF] shadow-sm hover:shadow-md transition-shadow">
+              <div className="border border-gray-200 rounded-xl p-6 bg-[#F1F7FF]">
                 <h3 className="text-lg font-semibold text-vip-blue mb-4">Настройки</h3>
                 <div className="space-y-3">
                   <a href="#" className="flex items-center justify-between group hover:text-vip-blue transition-colors text-[#002C6E]">

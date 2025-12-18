@@ -6,6 +6,9 @@ import LoginPage from './pages/Auth/LoginPage'
 import ProfilePage from './pages/Account/ProfilePage'
 import PersonalData from './pages/Account/PersonalData'
 import FastTrackPage from './pages/FastTrack/FastTrackPage'
+import VipLoungePage from './pages/VipLounge/VipLoungePage'
+import TransferPage from './pages/Transfer/TransferPage'
+import MeetAssistPage from './pages/MeetAssist/MeetAssistPage'
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -43,6 +46,9 @@ const App = () => {
       }>
         <Route index element={<HomePage />} />
         <Route path="/fast-track" element={<FastTrackPage />} />
+        <Route path="/vip-lounge" element={<VipLoungePage />} />
+        <Route path="/transfer" element={<TransferPage />} />
+        <Route path="/meet-assist" element={<MeetAssistPage />} />
       </Route>
       <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
       <Route path="/profile" element={<ProfilePage userEmail={userEmail} onLogout={handleLogout} />} />

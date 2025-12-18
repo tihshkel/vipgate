@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { FastTrackIcon, ChairIcon, CarIcon, PeopleIcon, RussianFlagIcon, QuestionIcon, ChatIcon, DownloadIcon } from '../ui/Icons'
 import QRCodeImage from '../../assets/icons/QR Code.jpg'
 import GooglePlayImage from '../../assets/icons/Icon/Social/Google Play.jpg'
@@ -22,7 +22,20 @@ import ReviewIcon from '../../assets/icons/welcome/Icon/Main/40/review.svg'
 import FavoriteIcon from '../../assets/icons/welcome/Icon/Main/40/favorite.svg'
 import OutIcon from '../../assets/icons/Icon/Main/24/Out.svg'
 
+// Функция для получения пути к флагу по коду страны
+const getFlagPath = (countryCode) => {
+  if (!countryCode) return null
+  try {
+    // Используем правильный путь для Vite
+    return new URL(`../../assets/flags/flag/${countryCode.toUpperCase()}.svg`, import.meta.url).href
+  } catch (error) {
+    console.error('Error loading flag:', error)
+    return null
+  }
+}
+
 const Header = ({ onLoginClick, isLoggedIn, userEmail, onLogout, userPhoto }) => {
+  const location = useLocation()
   const [showLanguageModal, setShowLanguageModal] = useState(false)
   const [showDownloadModal, setShowDownloadModal] = useState(false)
   const [showCurrencyModal, setShowCurrencyModal] = useState(false)
@@ -31,7 +44,7 @@ const Header = ({ onLoginClick, isLoggedIn, userEmail, onLogout, userPhoto }) =>
   const [searchQuery, setSearchQuery] = useState('')
   const [currencySearchQuery, setCurrencySearchQuery] = useState('')
   const [selectedLanguage, setSelectedLanguage] = useState('Русский')
-  const [selectedCurrency, setSelectedCurrency] = useState({ code: 'RUB', name: 'Российский рубль', flag: '🇷🇺' })
+  const [selectedCurrency, setSelectedCurrency] = useState({ code: 'RUB', name: 'Российский рубль', countryCode: 'RU' })
   const [savedPhoto, setSavedPhoto] = useState(null)
 
   useEffect(() => {
@@ -47,63 +60,63 @@ const Header = ({ onLoginClick, isLoggedIn, userEmail, onLogout, userPhoto }) =>
   const displayPhoto = userPhoto || savedPhoto
 
   const languages = [
-    { code: 'ru', name: 'Русский', flag: '🇷🇺' },
-    { code: 'en', name: 'English', flag: '🇬🇧' },
-    { code: 'ko', name: '한국어', flag: '🇰🇷' },
-    { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' },
-    { code: 'zh', name: '中文', flag: '🇨🇳' },
-    { code: 'ja', name: '日本語', flag: '🇯🇵' },
-    { code: 'es', name: 'Español', flag: '🇪🇸' },
-    { code: 'fr', name: 'Français', flag: '🇫🇷' },
-    { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
-    { code: 'it', name: 'Italiano', flag: '🇮🇹' },
-    { code: 'pt', name: 'Português', flag: '🇵🇹' },
-    { code: 'ar', name: 'العربية', flag: '🇸🇦' },
-    { code: 'tr', name: 'Türkçe', flag: '🇹🇷' },
-    { code: 'pl', name: 'Polski', flag: '🇵🇱' },
-    { code: 'nl', name: 'Nederlands', flag: '🇳🇱' },
-    { code: 'sv', name: 'Svenska', flag: '🇸🇪' },
-    { code: 'no', name: 'Norsk', flag: '🇳🇴' },
-    { code: 'da', name: 'Dansk', flag: '🇩🇰' },
-    { code: 'fi', name: 'Suomi', flag: '🇫🇮' },
-    { code: 'cs', name: 'Čeština', flag: '🇨🇿' },
-    { code: 'hu', name: 'Magyar', flag: '🇭🇺' },
-    { code: 'ro', name: 'Română', flag: '🇷🇴' },
-    { code: 'el', name: 'Ελληνικά', flag: '🇬🇷' },
-    { code: 'he', name: 'עברית', flag: '🇮🇱' },
-    { code: 'th', name: 'ไทย', flag: '🇹🇭' },
-    { code: 'id', name: 'Bahasa Indonesia', flag: '🇮🇩' },
-    { code: 'ms', name: 'Bahasa Melayu', flag: '🇲🇾' },
-    { code: 'hi', name: 'हिन्दी', flag: '🇮🇳' },
-    { code: 'uk', name: 'Українська', flag: '🇺🇦' }
+    { code: 'ru', name: 'Русский', countryCode: 'RU' },
+    { code: 'en', name: 'English', countryCode: 'GB' },
+    { code: 'ko', name: '한국어', countryCode: 'KR' },
+    { code: 'vi', name: 'Tiếng Việt', countryCode: 'VN' },
+    { code: 'zh', name: '中文', countryCode: 'CN' },
+    { code: 'ja', name: '日本語', countryCode: 'JP' },
+    { code: 'es', name: 'Español', countryCode: 'ES' },
+    { code: 'fr', name: 'Français', countryCode: 'FR' },
+    { code: 'de', name: 'Deutsch', countryCode: 'DE' },
+    { code: 'it', name: 'Italiano', countryCode: 'IT' },
+    { code: 'pt', name: 'Português', countryCode: 'PT' },
+    { code: 'ar', name: 'العربية', countryCode: 'SA' },
+    { code: 'tr', name: 'Türkçe', countryCode: 'TR' },
+    { code: 'pl', name: 'Polski', countryCode: 'PL' },
+    { code: 'nl', name: 'Nederlands', countryCode: 'NL' },
+    { code: 'sv', name: 'Svenska', countryCode: 'SE' },
+    { code: 'no', name: 'Norsk', countryCode: 'NO' },
+    { code: 'da', name: 'Dansk', countryCode: 'DK' },
+    { code: 'fi', name: 'Suomi', countryCode: 'FI' },
+    { code: 'cs', name: 'Čeština', countryCode: 'CZ' },
+    { code: 'hu', name: 'Magyar', countryCode: 'HU' },
+    { code: 'ro', name: 'Română', countryCode: 'RO' },
+    { code: 'el', name: 'Ελληνικά', countryCode: 'GR' },
+    { code: 'he', name: 'עברית', countryCode: 'IL' },
+    { code: 'th', name: 'ไทย', countryCode: 'TH' },
+    { code: 'id', name: 'Bahasa Indonesia', countryCode: 'ID' },
+    { code: 'ms', name: 'Bahasa Melayu', countryCode: 'MY' },
+    { code: 'hi', name: 'हिन्दी', countryCode: 'IN' },
+    { code: 'uk', name: 'Українська', countryCode: 'UA' }
   ]
 
   const currencies = [
-    { code: 'RUB', name: 'Российский рубль', flag: '🇷🇺' },
-    { code: 'USD', name: 'Доллар США', flag: '🇺🇸' },
-    { code: 'KRW', name: 'Корейская вона', flag: '🇰🇷' },
-    { code: 'VND', name: 'Вьетнамский донг', flag: '🇻🇳' },
-    { code: 'EUR', name: 'Евро', flag: '🇪🇺' },
-    { code: 'GBP', name: 'Фунт стерлингов', flag: '🇬🇧' },
-    { code: 'CNY', name: 'Китайский юань', flag: '🇨🇳' },
-    { code: 'JPY', name: 'Японская иена', flag: '🇯🇵' },
-    { code: 'AUD', name: 'Австралийский доллар', flag: '🇦🇺' },
-    { code: 'CAD', name: 'Канадский доллар', flag: '🇨🇦' },
-    { code: 'CHF', name: 'Швейцарский франк', flag: '🇨🇭' },
-    { code: 'SGD', name: 'Сингапурский доллар', flag: '🇸🇬' },
-    { code: 'HKD', name: 'Гонконгский доллар', flag: '🇭🇰' },
-    { code: 'NZD', name: 'Новозеландский доллар', flag: '🇳🇿' },
-    { code: 'SEK', name: 'Шведская крона', flag: '🇸🇪' },
-    { code: 'NOK', name: 'Норвежская крона', flag: '🇳🇴' },
-    { code: 'DKK', name: 'Датская крона', flag: '🇩🇰' },
-    { code: 'PLN', name: 'Польский злотый', flag: '🇵🇱' },
-    { code: 'TRY', name: 'Турецкая лира', flag: '🇹🇷' },
-    { code: 'THB', name: 'Тайский бат', flag: '🇹🇭' },
-    { code: 'MYR', name: 'Малайзийский ринггит', flag: '🇲🇾' },
-    { code: 'IDR', name: 'Индонезийская рупия', flag: '🇮🇩' },
-    { code: 'INR', name: 'Индийская рупия', flag: '🇮🇳' },
-    { code: 'AED', name: 'Дирхам ОАЭ', flag: '🇦🇪' },
-    { code: 'SAR', name: 'Саудовский риял', flag: '🇸🇦' }
+    { code: 'RUB', name: 'Российский рубль', countryCode: 'RU' },
+    { code: 'USD', name: 'Доллар США', countryCode: 'US' },
+    { code: 'KRW', name: 'Корейская вона', countryCode: 'KR' },
+    { code: 'VND', name: 'Вьетнамский донг', countryCode: 'VN' },
+    { code: 'EUR', name: 'Евро', countryCode: 'EU' },
+    { code: 'GBP', name: 'Фунт стерлингов', countryCode: 'GB' },
+    { code: 'CNY', name: 'Китайский юань', countryCode: 'CN' },
+    { code: 'JPY', name: 'Японская иена', countryCode: 'JP' },
+    { code: 'AUD', name: 'Австралийский доллар', countryCode: 'AU' },
+    { code: 'CAD', name: 'Канадский доллар', countryCode: 'CA' },
+    { code: 'CHF', name: 'Швейцарский франк', countryCode: 'CH' },
+    { code: 'SGD', name: 'Сингапурский доллар', countryCode: 'SG' },
+    { code: 'HKD', name: 'Гонконгский доллар', countryCode: 'HK' },
+    { code: 'NZD', name: 'Новозеландский доллар', countryCode: 'NZ' },
+    { code: 'SEK', name: 'Шведская крона', countryCode: 'SE' },
+    { code: 'NOK', name: 'Норвежская крона', countryCode: 'NO' },
+    { code: 'DKK', name: 'Датская крона', countryCode: 'DK' },
+    { code: 'PLN', name: 'Польский злотый', countryCode: 'PL' },
+    { code: 'TRY', name: 'Турецкая лира', countryCode: 'TR' },
+    { code: 'THB', name: 'Тайский бат', countryCode: 'TH' },
+    { code: 'MYR', name: 'Малайзийский ринггит', countryCode: 'MY' },
+    { code: 'IDR', name: 'Индонезийская рупия', countryCode: 'ID' },
+    { code: 'INR', name: 'Индийская рупия', countryCode: 'IN' },
+    { code: 'AED', name: 'Дирхам ОАЭ', countryCode: 'AE' },
+    { code: 'SAR', name: 'Саудовский риял', countryCode: 'SA' }
   ]
 
   const filteredLanguages = languages.filter(lang =>
@@ -183,58 +196,60 @@ const Header = ({ onLoginClick, isLoggedIn, userEmail, onLogout, userPhoto }) =>
             </div>
           </div>
 
-          {/* Нижняя строка - Fast Track и VIP lounge */}
-          <div className="flex items-center justify-between gap-2 overflow-x-auto scrollbar-hide pb-1">
-            <Link to="/fast-track" className="flex items-center gap-1.5 sm:gap-2 hover:opacity-80 transition-opacity whitespace-nowrap">
-              <FastTrackIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="text-sm font-medium">Fast Track</span>
+          {/* Нижняя строка - Fast Track и VIP lounge с горизонтальным скроллом */}
+          <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4 snap-x snap-mandatory">
+            {/* Большие кнопки Fast Track и VIP Lounge */}
+            <Link 
+              to="/fast-track" 
+              className="flex items-center gap-2 px-4 py-2.5 hover:opacity-80 transition-opacity whitespace-nowrap flex-shrink-0 snap-start min-w-[140px] justify-center"
+            >
+              <FastTrackIcon className="w-5 h-5" />
+              <span className="text-base font-semibold">Fast Track</span>
             </Link>
-            <a href="#" className="flex items-center gap-1.5 sm:gap-2 hover:opacity-80 transition-opacity whitespace-nowrap">
-              <ChairIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="text-sm font-medium">VIP lounge</span>
-            </a>
+            <Link 
+              to="/vip-lounge" 
+              className="flex items-center gap-2 px-4 py-2.5 hover:opacity-80 transition-opacity whitespace-nowrap flex-shrink-0 snap-start min-w-[140px] justify-center"
+            >
+              <ChairIcon className="w-5 h-5" />
+              <span className="text-base font-semibold">VIP lounge</span>
+            </Link>
+            {/* Дополнительные разделы при скролле */}
+            <Link 
+              to="/transfer" 
+              className="flex items-center gap-2 px-4 py-2.5 hover:opacity-80 transition-opacity whitespace-nowrap flex-shrink-0 snap-start min-w-[140px] justify-center"
+            >
+              <CarIcon className="w-5 h-5" />
+              <span className="text-base font-semibold">Transfer</span>
+            </Link>
+            <Link 
+              to="/meet-assist" 
+              className="flex items-center gap-2 px-4 py-2.5 hover:opacity-80 transition-opacity whitespace-nowrap flex-shrink-0 snap-start min-w-[140px] justify-center"
+            >
+              <PeopleIcon className="w-5 h-5" />
+              <span className="text-base font-semibold">Meet & assist</span>
+            </Link>
           </div>
         </div>
 
-        {/* Десктопная версия */}
-        <div className="hidden lg:flex items-center justify-between gap-4">
-          {/* Логотип */}
-          <Link to="/" className="text-xl md:text-2xl font-bold flex-shrink-0 hover:text-vip-gold transition-colors">Vipgate.com</Link>
+        {/* Десктопная версия - два ряда */}
+        <div className="hidden lg:flex flex-col gap-3">
+          {/* Верхний ряд */}
+          <div className="flex items-center justify-between">
+            {/* Логотип */}
+            <Link to="/" className="text-xl md:text-2xl font-bold flex-shrink-0 hover:text-vip-gold transition-colors">Vipgate.com</Link>
 
-          {/* Навигация */}
-          <nav className="flex items-center gap-4 xl:gap-8 overflow-x-auto scrollbar-hide">
-            <Link to="/fast-track" className="flex items-center gap-2 hover:text-vip-gold transition-colors text-sm xl:text-base whitespace-nowrap">
-              <FastTrackIcon className="w-4 h-4 xl:w-5 xl:h-5" />
-              <span>Fast Track</span>
-            </Link>
-            <a href="#" className="flex items-center gap-2 hover:text-vip-gold transition-colors text-sm xl:text-base whitespace-nowrap">
-              <ChairIcon className="w-4 h-4 xl:w-5 xl:h-5" />
-              <span>VIP lounge</span>
-            </a>
-            <a href="#" className="flex items-center gap-2 hover:text-vip-gold transition-colors text-sm xl:text-base whitespace-nowrap">
-              <CarIcon className="w-4 h-4 xl:w-5 xl:h-5" />
-              <span>Transfer</span>
-            </a>
-            <a href="#" className="flex items-center gap-2 hover:text-vip-gold transition-colors text-sm xl:text-base whitespace-nowrap">
-              <PeopleIcon className="w-4 h-4 xl:w-5 xl:h-5" />
-              <span>Meet & assist</span>
-            </a>
-          </nav>
-
-          {/* Правая часть */}
-          <div className="flex items-center gap-3 xl:gap-6 flex-shrink-0">
-          {/* Валюта - скрыта на мобильных */}
-          <div className="hidden lg:flex items-center gap-3 xl:gap-4">
-            {/* Кнопка выбора валюты */}
-            <div className="relative">
-              <button
-                onClick={() => setShowCurrencyModal(true)}
-                className="flex items-center gap-2 text-sm hover:text-vip-gold transition-colors cursor-pointer"
-                tabIndex={0}
-                aria-label="Выбрать валюту"
-              >
-                <span>{selectedCurrency.code}</span>
-              </button>
+            {/* Правая часть верхнего ряда */}
+            <div className="flex items-center gap-3 xl:gap-4 flex-shrink-0">
+              {/* Валюта */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowCurrencyModal(true)}
+                  className="flex items-center gap-2 text-sm hover:text-vip-gold transition-colors cursor-pointer"
+                  tabIndex={0}
+                  aria-label="Выбрать валюту"
+                >
+                  <span>{selectedCurrency.code}</span>
+                </button>
               
               {/* Модальное окно выбора валюты */}
               {showCurrencyModal && (
@@ -302,7 +317,14 @@ const Header = ({ onLoginClick, isLoggedIn, userEmail, onLogout, userPhoto }) =>
                               className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left"
                               tabIndex={0}
                             >
-                              <span className="text-xl">{currency.flag}</span>
+                              {getFlagPath(currency.countryCode) && (
+                                <img 
+                                  src={getFlagPath(currency.countryCode)} 
+                                  alt={currency.name} 
+                                  className="w-6 h-6 object-contain flex-shrink-0"
+                                  onError={(e) => { e.target.style.display = 'none' }}
+                                />
+                              )}
                               <span className="text-gray-800 text-sm">{currency.name}, {currency.code}</span>
                               {selectedCurrency.code === currency.code && (
                                 <span className="ml-auto text-vip-blue">✓</span>
@@ -389,7 +411,14 @@ const Header = ({ onLoginClick, isLoggedIn, userEmail, onLogout, userPhoto }) =>
                               className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left"
                               tabIndex={0}
                             >
-                              <span className="text-xl">{language.flag}</span>
+                              {getFlagPath(language.countryCode) && (
+                                <img 
+                                  src={getFlagPath(language.countryCode)} 
+                                  alt={language.name} 
+                                  className="w-6 h-6 object-contain flex-shrink-0"
+                                  onError={(e) => { e.target.style.display = 'none' }}
+                                />
+                              )}
                               <span className="text-gray-800 text-sm">{language.name}</span>
                             </button>
                           ))
@@ -404,114 +433,171 @@ const Header = ({ onLoginClick, isLoggedIn, userEmail, onLogout, userPhoto }) =>
                 </>
               )}
             </div>
-          </div>
 
-          {/* Иконки */}
-          <div className="hidden lg:flex items-center gap-2">
-            <button 
-              className="hover:text-vip-gold transition-colors w-8 h-8 flex items-center justify-center" 
-              aria-label="Помощь"
-              tabIndex={0}
-            >
-              <QuestionIcon className="w-5 h-5" />
-            </button>
-            <button 
-              className="hover:text-vip-gold transition-colors w-8 h-8 flex items-center justify-center" 
-              aria-label="Чат"
-              tabIndex={0}
-            >
-              <ChatIcon className="w-5 h-5" />
-            </button>
-          </div>
+              {/* Иконки */}
+              <div className="flex items-center gap-2">
+                <button 
+                  className="hover:text-vip-gold transition-colors w-8 h-8 flex items-center justify-center" 
+                  aria-label="Помощь"
+                  tabIndex={0}
+                >
+                  <QuestionIcon className="w-5 h-5" />
+                </button>
+                <button 
+                  className="hover:text-vip-gold transition-colors w-8 h-8 flex items-center justify-center" 
+                  aria-label="Чат"
+                  tabIndex={0}
+                >
+                  <ChatIcon className="w-5 h-5" />
+                </button>
+              </div>
 
-          {/* Кнопки */}
-          {isLoggedIn ? (
-            <>
-              {/* Иконка колокольчика */}
-              <button 
-                className="hover:text-vip-gold transition-colors w-8 h-8 flex items-center justify-center relative"
-                aria-label="Уведомления"
-                tabIndex={0}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                </svg>
-              </button>
-              {/* Круглая кнопка с первой буквой и выпадающее меню */}
-              <div className="relative">
-                <div className="flex flex-col items-center gap-0 cursor-pointer" onClick={() => setShowProfileMenu(!showProfileMenu)}>
-                  <button
-                    className={`w-10 h-10 rounded-full ${displayPhoto ? '' : 'bg-[#E5E7EB]'} border-2 border-[#FFB700] text-[#002C6E] font-bold text-lg flex items-center justify-center hover:opacity-90 transition-opacity overflow-hidden`}
-                    aria-label="Профиль"
+              {/* Кнопка входа или профиль */}
+              {isLoggedIn ? (
+                <>
+                  {/* Иконка колокольчика */}
+                  <button 
+                    className="hover:text-vip-gold transition-colors w-8 h-8 flex items-center justify-center relative"
+                    aria-label="Уведомления"
                     tabIndex={0}
                   >
-                    {displayPhoto ? (
-                      <img src={displayPhoto} alt="Profile" className="w-full h-full object-cover" />
-                    ) : (
-                      userEmail ? userEmail.charAt(0).toUpperCase() : 'A'
-                    )}
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
                   </button>
-                  <span className="text-[10px] font-bold mt-0.5">Start</span>
-                </div>
-
-                {/* Dropdown Menu */}
-                {showProfileMenu && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setShowProfileMenu(false)}></div>
-                    <div className="absolute top-full right-0 mt-2 w-[320px] bg-white rounded-xl shadow-lg z-50 py-2 divide-y divide-gray-100 border border-gray-100">
-                       {/* Items */}
-                       <Link to="/profile/personal-data" className="flex items-center gap-3 px-4 py-3 bg-white text-gray-700 hover:bg-[#F1F7FF] hover:text-[#002C6E] transition-colors">
-                          <img src={PersonalDataIcon} className="w-5 h-5" alt="Мой аккаунт"/>
-                          <span className="text-sm font-medium">Мой аккаунт</span>
-                       </Link>
-                       <a href="#" className="flex items-center gap-3 px-4 py-3 bg-white text-gray-700 hover:bg-[#F1F7FF] hover:text-[#002C6E] transition-colors">
-                          <img src={CaseIcon} className="w-5 h-5" alt="Бронирования"/>
-                          <span className="text-sm font-medium">Бронирования и поездки</span>
-                       </a>
-                       <a href="#" className="flex items-center gap-3 px-4 py-3 bg-white text-gray-700 hover:bg-[#F1F7FF] hover:text-[#002C6E] transition-colors">
-                          <img src={DocsIconMain} className="w-5 h-5" alt="Программа лояльности"/>
-                          <span className="text-sm font-medium">Программа лояльности</span>
-                       </a>
-                       <a href="#" className="flex items-center gap-3 px-4 py-3 bg-white text-gray-700 hover:bg-[#F1F7FF] hover:text-[#002C6E] transition-colors">
-                          <img src={WalletIcon} className="w-5 h-5" alt="Вознаграждения"/>
-                          <span className="text-sm font-medium">Вознаграждения и кошелек</span>
-                       </a>
-                       <a href="#" className="flex items-center gap-3 px-4 py-3 bg-white text-gray-700 hover:bg-[#F1F7FF] hover:text-[#002C6E] transition-colors">
-                          <img src={ReviewIcon} className="w-5 h-5" alt="Отзывы"/>
-                          <span className="text-sm font-medium">Отзывы</span>
-                       </a>
-                       <a href="#" className="flex items-center gap-3 px-4 py-3 bg-white text-gray-700 hover:bg-[#F1F7FF] hover:text-[#002C6E] transition-colors">
-                          <img src={FavoriteIcon} className="w-5 h-5" alt="Избранное"/>
-                          <span className="text-sm font-medium">Избранное</span>
-                       </a>
-                       <button onClick={onLogout} className="w-full flex items-center gap-3 px-4 py-3 bg-white text-gray-700 hover:bg-[#F1F7FF] hover:text-[#002C6E] transition-colors text-left">
-                          <img src={OutIcon} className="w-5 h-5" alt="Выйти"/>
-                          <span className="text-sm font-medium">Выйти из аккаунта</span>
-                       </button>
+                  {/* Круглая кнопка с первой буквой и выпадающее меню */}
+                  <div className="relative">
+                    <div className="flex flex-col items-center gap-0 cursor-pointer" onClick={() => setShowProfileMenu(!showProfileMenu)}>
+                      <button
+                        className={`w-10 h-10 rounded-full ${displayPhoto ? '' : 'bg-[#E5E7EB]'} border-2 border-[#FFB700] text-[#002C6E] font-bold text-lg flex items-center justify-center hover:opacity-90 transition-opacity overflow-hidden`}
+                        aria-label="Профиль"
+                        tabIndex={0}
+                      >
+                        {displayPhoto ? (
+                          <img src={displayPhoto} alt="Profile" className="w-full h-full object-cover" />
+                        ) : (
+                          userEmail ? userEmail.charAt(0).toUpperCase() : 'A'
+                        )}
+                      </button>
+                      <span className="text-[10px] font-bold mt-0.5">Start</span>
                     </div>
-                  </>
-                )}
-              </div>
-            </>
-          ) : (
+
+                    {/* Dropdown Menu */}
+                    {showProfileMenu && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setShowProfileMenu(false)}></div>
+                        <div className="absolute top-full right-0 mt-2 w-[320px] bg-white rounded-xl shadow-lg z-50 py-2 divide-y divide-gray-100 border border-gray-100">
+                           {/* Items */}
+                           <Link to="/profile/personal-data" className="flex items-center gap-3 px-4 py-3 bg-white text-gray-700 hover:bg-[#F1F7FF] hover:text-[#002C6E] transition-colors">
+                              <img src={PersonalDataIcon} className="w-5 h-5" alt="Мой аккаунт"/>
+                              <span className="text-sm font-medium">Мой аккаунт</span>
+                           </Link>
+                           <a href="#" className="flex items-center gap-3 px-4 py-3 bg-white text-gray-700 hover:bg-[#F1F7FF] hover:text-[#002C6E] transition-colors">
+                              <img src={CaseIcon} className="w-5 h-5" alt="Бронирования"/>
+                              <span className="text-sm font-medium">Бронирования и поездки</span>
+                           </a>
+                           <a href="#" className="flex items-center gap-3 px-4 py-3 bg-white text-gray-700 hover:bg-[#F1F7FF] hover:text-[#002C6E] transition-colors">
+                              <img src={DocsIconMain} className="w-5 h-5" alt="Программа лояльности"/>
+                              <span className="text-sm font-medium">Программа лояльности</span>
+                           </a>
+                           <a href="#" className="flex items-center gap-3 px-4 py-3 bg-white text-gray-700 hover:bg-[#F1F7FF] hover:text-[#002C6E] transition-colors">
+                              <img src={WalletIcon} className="w-5 h-5" alt="Вознаграждения"/>
+                              <span className="text-sm font-medium">Вознаграждения и кошелек</span>
+                           </a>
+                           <a href="#" className="flex items-center gap-3 px-4 py-3 bg-white text-gray-700 hover:bg-[#F1F7FF] hover:text-[#002C6E] transition-colors">
+                              <img src={ReviewIcon} className="w-5 h-5" alt="Отзывы"/>
+                              <span className="text-sm font-medium">Отзывы</span>
+                           </a>
+                           <a href="#" className="flex items-center gap-3 px-4 py-3 bg-white text-gray-700 hover:bg-[#F1F7FF] hover:text-[#002C6E] transition-colors">
+                              <img src={FavoriteIcon} className="w-5 h-5" alt="Избранное"/>
+                              <span className="text-sm font-medium">Избранное</span>
+                           </a>
+                           <button onClick={onLogout} className="w-full flex items-center gap-3 px-4 py-3 bg-white text-gray-700 hover:bg-[#F1F7FF] hover:text-[#002C6E] transition-colors text-left">
+                              <img src={OutIcon} className="w-5 h-5" alt="Выйти"/>
+                              <span className="text-sm font-medium">Выйти из аккаунта</span>
+                           </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <button 
+                  className="bg-white text-vip-blue px-4 xl:px-6 py-2.5 rounded-lg text-sm xl:text-base font-medium hover:bg-gray-100 transition-colors whitespace-nowrap w-[220px] xl:w-[250px] flex items-center justify-center"
+                  tabIndex={0}
+                  onClick={onLoginClick}
+                >
+                  <span className="hidden md:inline">Войти в аккаунт</span>
+                  <span className="md:hidden">Войти</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Нижний ряд */}
+          <div className="flex items-center justify-between">
+            {/* Навигация */}
+            <nav className="flex items-center gap-4 xl:gap-8 overflow-x-auto scrollbar-hide">
+              <Link 
+                to="/fast-track" 
+                className={`flex items-center gap-2 hover:text-vip-gold transition-colors text-sm xl:text-base whitespace-nowrap px-3 py-1.5 rounded-full ${
+                  location.pathname === '/fast-track' 
+                    ? 'bg-vip-blue text-white border-2' 
+                    : 'text-white'
+                }`}
+                style={location.pathname === '/fast-track' ? { borderColor: '#FFB700' } : {}}
+              >
+                <FastTrackIcon className="w-4 h-4 xl:w-5 xl:h-5" />
+                <span>Fast Track</span>
+              </Link>
+              <Link 
+                to="/vip-lounge" 
+                className={`flex items-center gap-2 hover:text-vip-gold transition-colors text-sm xl:text-base whitespace-nowrap px-3 py-1.5 rounded-full ${
+                  location.pathname === '/vip-lounge' 
+                    ? 'bg-vip-blue text-white border-2' 
+                    : 'text-white'
+                }`}
+                style={location.pathname === '/vip-lounge' ? { borderColor: '#FFB700' } : {}}
+              >
+                <ChairIcon className="w-4 h-4 xl:w-5 xl:h-5" />
+                <span>VIP lounge</span>
+              </Link>
+              <Link 
+                to="/transfer" 
+                className={`flex items-center gap-2 hover:text-vip-gold transition-colors text-sm xl:text-base whitespace-nowrap px-3 py-1.5 rounded-full ${
+                  location.pathname === '/transfer' 
+                    ? 'bg-vip-blue text-white border-2' 
+                    : 'text-white'
+                }`}
+                style={location.pathname === '/transfer' ? { borderColor: '#FFB700' } : {}}
+              >
+                <CarIcon className="w-4 h-4 xl:w-5 xl:h-5" />
+                <span>Transfer</span>
+              </Link>
+              <Link 
+                to="/meet-assist" 
+                className={`flex items-center gap-2 hover:text-vip-gold transition-colors text-sm xl:text-base whitespace-nowrap px-3 py-1.5 rounded-full ${
+                  location.pathname === '/meet-assist' 
+                    ? 'bg-vip-blue text-white border-2' 
+                    : 'text-white'
+                }`}
+                style={location.pathname === '/meet-assist' ? { borderColor: '#FFB700' } : {}}
+              >
+                <PeopleIcon className="w-4 h-4 xl:w-5 xl:h-5" />
+                <span>Meet & assist</span>
+              </Link>
+            </nav>
+
+            {/* Кнопка скачивания приложения */}
             <button 
-              className="bg-white text-vip-blue px-3 xl:px-5 py-2 rounded text-xs xl:text-sm font-medium hover:bg-gray-100 transition-colors whitespace-nowrap"
+              onClick={() => setShowDownloadModal(true)}
+              className="bg-vip-blue border border-white text-white px-4 xl:px-6 py-2.5 rounded-lg text-sm xl:text-base font-medium flex items-center justify-center gap-2 hover:bg-opacity-90 transition-colors whitespace-nowrap w-[220px] xl:w-[250px]"
               tabIndex={0}
-              onClick={onLoginClick}
             >
-              <span className="hidden md:inline">Войти в аккаунт</span>
-              <span className="md:hidden">Войти</span>
+              <DownloadIcon className="w-4 h-4" />
+              <span className="hidden xl:inline">Скачать приложение</span>
+              <span className="xl:hidden">Скачать</span>
             </button>
-          )}
-          <button 
-            onClick={() => setShowDownloadModal(true)}
-            className="bg-vip-blue border border-white text-white px-3 xl:px-5 py-2 rounded text-xs xl:text-sm font-medium flex items-center gap-2 hover:bg-opacity-90 transition-colors whitespace-nowrap"
-            tabIndex={0}
-          >
-            <DownloadIcon className="w-4 h-4" />
-            <span className="hidden xl:inline">Скачать приложение</span>
-            <span className="xl:hidden">Скачать</span>
-          </button>
           </div>
         </div>
       </div>

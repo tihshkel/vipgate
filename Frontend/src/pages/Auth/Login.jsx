@@ -316,7 +316,6 @@ const Login = ({ onClose, onLoginSuccess }) => {
               <div className="flex items-center gap-3 md:gap-6">
                 <div className="flex items-center gap-2 text-sm">
                   <RussianFlagIcon className="w-8 h-6" />
-                  <span>RUB</span>
                 </div>
                 <button 
                   className="w-5 h-5 flex items-center justify-center"
@@ -626,7 +625,6 @@ const Login = ({ onClose, onLoginSuccess }) => {
             <div className="flex items-center gap-3 md:gap-6">
               <div className="flex items-center gap-2 text-sm">
                 <RussianFlagIcon className="w-8 h-6" />
-                <span>RUB</span>
               </div>
               <button 
                 className="w-5 h-5 flex items-center justify-center"

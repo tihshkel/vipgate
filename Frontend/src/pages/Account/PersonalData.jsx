@@ -32,20 +32,20 @@ const CustomSelect = ({ options, value, onChange, placeholder, className }) => {
   return (
     <div className={`relative ${className}`} ref={ref}>
       <div 
-        className="w-full px-4 py-3 rounded-lg border border-gray-200 text-sm bg-white cursor-pointer flex items-center justify-between"
+        className="w-full px-5 py-4 rounded-lg border border-gray-200 text-base bg-white cursor-pointer flex items-center justify-between"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className={value ? 'text-[#002C6E]' : 'text-gray-500'}>
           {selectedOption ? selectedOption.label : placeholder}
         </span>
-        <svg className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/></svg>
+        <svg className={`w-5 h-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/></svg>
       </div>
       {isOpen && (
         <div className="absolute top-full left-0 w-full mt-1 bg-white border border-gray-100 rounded-xl shadow-lg z-20 max-h-60 overflow-y-auto">
           {options.map((option) => (
             <div
               key={option.value}
-              className="px-4 py-2 text-sm text-[#002C6E] hover:bg-[#F1F7FF] cursor-pointer"
+              className="px-5 py-3 text-base text-[#002C6E] hover:bg-[#F1F7FF] cursor-pointer"
               onClick={() => {
                 onChange(option.value)
                 setIsOpen(false)
@@ -69,6 +69,7 @@ const PersonalData = ({ userEmail, onLogout }) => {
   const [day, setDay] = useState('')
   const [month, setMonth] = useState('')
   const [year, setYear] = useState('')
+  const [gender, setGender] = useState('')
   const [citizenship, setCitizenship] = useState('')
   const [selectedCountryCode, setSelectedCountryCode] = useState('RU')
   
@@ -119,6 +120,7 @@ const PersonalData = ({ userEmail, onLogout }) => {
         }
         
         if (data.nationality) setCitizenship(data.nationality)
+        if (data.gender) setGender(data.gender)
         if (data.profile_photo_url) setPhoto(data.profile_photo_url)
       }
     } catch (error) {
@@ -148,6 +150,7 @@ const PersonalData = ({ userEmail, onLogout }) => {
         birth_day: day ? parseInt(day) : null,
         birth_month: month ? parseInt(month) : null,
         birth_year: year ? parseInt(year) : null,
+        gender: gender.trim(),
         nationality: citizenship.trim(),
       }
       
@@ -275,6 +278,12 @@ const PersonalData = ({ userEmail, onLogout }) => {
   ]
   const countries = countriesList.map(c => ({ value: c, label: c }))
 
+  const genderOptions = [
+    { value: 'male', label: 'Мужской' },
+    { value: 'female', label: 'Женский' },
+    { value: 'other', label: 'Другое' }
+  ]
+
   const phoneCodes = [
     { code: '+7', country: 'RU', flag: '🇷🇺' },
     { code: '+375', country: 'BY', flag: '🇧🇾' },
@@ -361,17 +370,17 @@ const PersonalData = ({ userEmail, onLogout }) => {
 
           {/* Form */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-[#F1F7FF] rounded-xl p-6 md:p-8">
+            <div className="bg-[#F1F7FF] rounded-xl p-8 md:p-10 lg:p-12">
                {/* Name */}
-               <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center mb-4">
-                  <label className="md:col-span-1 text-sm font-bold text-[#002C6E]">Ваше имя</label>
+               <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-center mb-6">
+                  <label className="md:col-span-1 text-base font-bold text-[#002C6E]">Ваше имя</label>
                   <div className="md:col-span-2">
                      <input 
                        type="text" 
                        placeholder="Имя" 
                        value={firstName}
                        onChange={(e) => setFirstName(e.target.value)}
-                       className="w-full px-4 py-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#002C6E]" 
+                       className="w-full px-5 py-4 rounded-lg border border-gray-200 text-base focus:outline-none focus:border-[#002C6E]" 
                      />
                   </div>
                   <div className="md:col-span-2">
@@ -380,42 +389,42 @@ const PersonalData = ({ userEmail, onLogout }) => {
                        placeholder="Фамилия" 
                        value={lastName}
                        onChange={(e) => setLastName(e.target.value)}
-                       className="w-full px-4 py-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#002C6E]" 
+                       className="w-full px-5 py-4 rounded-lg border border-gray-200 text-base focus:outline-none focus:border-[#002C6E]" 
                      />
                   </div>
                </div>
 
                {/* Email */}
-               <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-start mb-4">
-                  <label className="md:col-span-1 text-sm font-bold text-[#002C6E] pt-2">Адрес электронной почты</label>
+               <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-start mb-6">
+                  <label className="md:col-span-1 text-base font-bold text-[#002C6E] pt-2">Адрес электронной почты</label>
                   <div className="md:col-span-4">
-                     <div className="text-[10px] text-gray-500 mb-1">Только латинские буквы</div>
+                     <div className="text-xs text-gray-500 mb-2">Только латинские буквы</div>
                      <div className="relative">
                         <input 
                           type="email" 
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="w-full px-4 py-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#002C6E] pr-32" 
+                          className="w-full px-5 py-4 rounded-lg border border-gray-200 text-base focus:outline-none focus:border-[#002C6E] pr-32" 
                         />
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#12A156] text-white text-[10px] px-2 py-1 rounded">Подтверждено</span>
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#12A156] text-white text-xs px-3 py-1.5 rounded">Подтверждено</span>
                      </div>
                   </div>
                </div>
 
                {/* Phone */}
-               <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center mb-4">
-                  <label className="md:col-span-1 text-sm font-bold text-[#002C6E]">Номер телефона</label>
-                  <div className="md:col-span-4 flex gap-2">
-                     <div className="relative min-w-[110px]" ref={phoneDropdownRef}>
+               <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-center mb-6">
+                  <label className="md:col-span-1 text-base font-bold text-[#002C6E]">Номер телефона</label>
+                  <div className="md:col-span-4 flex gap-3">
+                     <div className="relative min-w-[120px]" ref={phoneDropdownRef}>
                         <div 
-                           className="w-full h-full px-2 py-3 bg-white rounded-lg border border-gray-200 flex items-center justify-between gap-2 cursor-pointer"
+                           className="w-full h-full px-3 py-4 bg-white rounded-lg border border-gray-200 flex items-center justify-between gap-2 cursor-pointer"
                            onClick={() => setIsPhoneDropdownOpen(!isPhoneDropdownOpen)}
                         >
                            <div className="flex items-center gap-2">
                              <span className="text-lg leading-none">{selectedCountry?.flag}</span>
-                             <span className="text-sm font-medium text-gray-700">{selectedCountry?.code}</span>
+                             <span className="text-base font-medium text-gray-700">{selectedCountry?.code}</span>
                            </div>
-                           <svg className={`w-3 h-3 ml-1 text-gray-400 transition-transform ${isPhoneDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/></svg>
+                           <svg className={`w-4 h-4 ml-1 text-gray-400 transition-transform ${isPhoneDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/></svg>
                         </div>
                         {isPhoneDropdownOpen && (
                            <div className="absolute top-full left-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-lg z-20 max-h-60 overflow-y-auto w-64">
@@ -443,15 +452,15 @@ const PersonalData = ({ userEmail, onLogout }) => {
                          if (e.target.value.length <= 15) setPhoneNumber(e.target.value)
                        }}
                        placeholder="(___) ___ - __ - __" 
-                       className="flex-1 px-4 py-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-[#002C6E]" 
+                       className="flex-1 px-5 py-4 rounded-lg border border-gray-200 text-base focus:outline-none focus:border-[#002C6E]" 
                      />
                   </div>
                </div>
 
                {/* Date of Birth */}
-               <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center mb-4">
-                  <label className="md:col-span-1 text-sm font-bold text-[#002C6E]">Дата рождения</label>
-                  <div className="md:col-span-4 grid grid-cols-3 gap-2">
+               <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-center mb-6">
+                  <label className="md:col-span-1 text-base font-bold text-[#002C6E]">Дата рождения</label>
+                  <div className="md:col-span-4 grid grid-cols-3 gap-3">
                       <CustomSelect 
                         options={days} 
                         value={day} 
@@ -473,9 +482,22 @@ const PersonalData = ({ userEmail, onLogout }) => {
                   </div>
                </div>
 
+               {/* Gender */}
+               <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-center mb-6">
+                  <label className="md:col-span-1 text-base font-bold text-[#002C6E]">Пол</label>
+                  <div className="md:col-span-4">
+                     <CustomSelect 
+                        options={genderOptions} 
+                        value={gender} 
+                        onChange={setGender} 
+                        placeholder="Выберите пол" 
+                     />
+                  </div>
+               </div>
+
                {/* Citizenship */}
-               <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center mb-8">
-                  <label className="md:col-span-1 text-sm font-bold text-[#002C6E]">Гражданство</label>
+               <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-center mb-8">
+                  <label className="md:col-span-1 text-base font-bold text-[#002C6E]">Гражданство</label>
                   <div className="md:col-span-4 relative">
                      <CustomSelect 
                         options={countries} 
@@ -521,7 +543,7 @@ const PersonalData = ({ userEmail, onLogout }) => {
                onChange={handleFileChange}
              />
              <div 
-               className={`w-full aspect-square border-2 ${isDragging ? 'border-[#002C6E] bg-[#E6F0FF]' : 'border-[#FFB700] bg-[#F1F7FF]'} rounded-lg flex flex-col items-center justify-center p-4 mb-4 cursor-pointer hover:bg-[#E6F0FF] transition-colors relative overflow-hidden`}
+               className={`w-full aspect-square border-2 ${isDragging ? 'border-[#002C6E] bg-[#E6F0FF]' : 'border-[#FFB700] bg-[#F1F7FF]'} rounded-lg flex flex-col items-center justify-center ${photo ? 'p-0' : 'p-4'} mb-4 cursor-pointer hover:bg-[#E6F0FF] transition-colors relative overflow-hidden`}
                onClick={triggerFileInput}
                onDragOver={handleDragOver}
                onDragLeave={handleDragLeave}
@@ -529,7 +551,7 @@ const PersonalData = ({ userEmail, onLogout }) => {
              >
                 {photo ? (
                   <div className="relative w-full h-full group">
-                    <img src={photo} alt="Profile" className="w-full h-full object-cover rounded-lg" />
+                    <img src={photo} alt="Profile" className="w-full h-full object-cover" />
                     <button 
                       onClick={handleRemovePhoto}
                       className="absolute top-2 right-2 p-1.5 bg-white/80 rounded-full hover:bg-white text-red-500 transition-colors shadow-sm opacity-0 group-hover:opacity-100"
