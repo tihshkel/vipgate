@@ -321,7 +321,7 @@ const Header = ({ onLoginClick, isLoggedIn, userEmail, onLogout, userPhoto }) =>
                                 <img 
                                   src={getFlagPath(currency.countryCode)} 
                                   alt={currency.name} 
-                                  className="w-6 h-6 object-contain flex-shrink-0"
+                                  className="w-6 h-6 object-cover flex-shrink-0 rounded-full"
                                   onError={(e) => { e.target.style.display = 'none' }}
                                 />
                               )}
@@ -351,7 +351,9 @@ const Header = ({ onLoginClick, isLoggedIn, userEmail, onLogout, userPhoto }) =>
                 tabIndex={0}
                 aria-label="Выбрать язык"
               >
-                <RussianFlagIcon className="w-5 h-5" />
+                <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0 aspect-square flex items-center justify-center">
+                  <RussianFlagIcon className="w-full h-full" />
+                </div>
               </button>
               
               {/* Модальное окно выбора языка */}
@@ -415,7 +417,7 @@ const Header = ({ onLoginClick, isLoggedIn, userEmail, onLogout, userPhoto }) =>
                                 <img 
                                   src={getFlagPath(language.countryCode)} 
                                   alt={language.name} 
-                                  className="w-6 h-6 object-contain flex-shrink-0"
+                                  className="w-6 h-6 object-cover flex-shrink-0 rounded-full"
                                   onError={(e) => { e.target.style.display = 'none' }}
                                 />
                               )}
@@ -649,7 +651,9 @@ const Header = ({ onLoginClick, isLoggedIn, userEmail, onLogout, userPhoto }) =>
                   className="w-full flex items-center gap-3 text-vip-blue hover:bg-gray-50 transition-colors py-3 px-2 rounded-lg"
                   tabIndex={0}
                 >
-                  <RussianFlagIcon className="w-6 h-6" />
+                  <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0 aspect-square flex items-center justify-center">
+                    <RussianFlagIcon className="w-full h-full" />
+                  </div>
                   <span className="text-base">Россия</span>
                 </button>
 

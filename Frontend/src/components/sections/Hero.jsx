@@ -178,17 +178,17 @@ const Hero = () => {
     <section className="relative min-h-screen flex flex-col justify-between overflow-visible">
       {/* Фоновое изображение */}
       <div 
-        className="absolute inset-0 bg-no-repeat overflow-hidden"
+        className="absolute inset-x-0 top-0 bg-no-repeat overflow-visible"
         style={{ 
           backgroundImage: `url(${mainPhoto})`,
-          backgroundPosition: isMobile ? 'right center' : 'right top',
-          backgroundSize: isMobile ? 'cover' : '160%',
+          backgroundPosition: isMobile ? 'right center' : 'right center',
+          backgroundSize: isMobile ? 'cover' : 'cover',
+          backgroundRepeat: 'no-repeat',
           backgroundAttachment: 'local',
-          display: 'flex',
-          flexFlow: 'column',
-          top: '-5px',
-          left: isMobile ? '0px' : '-272px',
-          width: isMobile ? '100%' : '1000px'
+          width: '100%',
+          top: '0',
+          bottom: isMobile ? 'auto' : '100px',
+          height: isMobile ? '100%' : 'auto'
         }}
       >
       </div>
@@ -297,7 +297,7 @@ const Hero = () => {
                           <img 
                             src={getCountryFlag(suggestion.countryCode)} 
                             alt={suggestion.country || suggestion.name} 
-                            className="w-6 h-6 object-contain flex-shrink-0"
+                            className="w-6 h-6 object-cover flex-shrink-0 rounded-full"
                             onError={(e) => { e.target.style.display = 'none' }}
                           />
                         )}
@@ -375,7 +375,7 @@ const Hero = () => {
                           <img 
                             src={getCountryFlag(suggestion.countryCode)} 
                             alt={suggestion.country || suggestion.name} 
-                            className="w-6 h-6 object-contain flex-shrink-0"
+                            className="w-6 h-6 object-cover flex-shrink-0 rounded-full"
                             onError={(e) => { e.target.style.display = 'none' }}
                           />
                         )}

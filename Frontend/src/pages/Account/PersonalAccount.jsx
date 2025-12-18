@@ -82,7 +82,9 @@ const PersonalAccount = ({ userEmail, onLogout }) => {
 
                 {/* Язык */}
                 <div className="flex items-center gap-2 text-sm">
-                  <RussianFlagIcon className="w-5 h-5" />
+                  <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0">
+                    <RussianFlagIcon className="w-5 h-5" />
+                  </div>
                 </div>
 
                 {/* Иконки */}
@@ -598,7 +600,9 @@ const PersonalAccount = ({ userEmail, onLogout }) => {
                   <span className="text-base">RUB Российский рубль</span>
                 </div>
                 <div className="w-full flex items-center gap-3 text-vip-blue py-3 px-2 rounded-lg">
-                  <RussianFlagIcon className="w-6 h-6" />
+                  <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
+                    <RussianFlagIcon className="w-6 h-6" />
+                  </div>
                   <span className="text-base">Россия</span>
                 </div>
                 <button

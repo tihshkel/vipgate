@@ -214,7 +214,7 @@ const SearchBar = () => {
                           <img 
                             src={getCountryFlag(suggestion.countryCode)} 
                             alt={suggestion.country || suggestion.name} 
-                            className="w-6 h-6 object-contain flex-shrink-0"
+                            className="w-6 h-6 object-cover flex-shrink-0 rounded-full"
                             onError={(e) => { e.target.style.display = 'none' }}
                           />
                         )}

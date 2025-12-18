@@ -231,7 +231,7 @@ const TransferPage = () => {
       </section>
 
       {/* Airport Selection Section */}
-      <section className="bg-gray-50 py-16">
+      <section className="py-16">
         <div className="container mx-auto px-4 md:px-8">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-bold text-vip-blue">Выбор аэропорта</h2>

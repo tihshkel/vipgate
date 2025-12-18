@@ -315,7 +315,9 @@ const Login = ({ onClose, onLoginSuccess }) => {
               <div className="text-xl md:text-2xl font-bold">Vipgate.com</div>
               <div className="flex items-center gap-3 md:gap-6">
                 <div className="flex items-center gap-2 text-sm">
-                  <RussianFlagIcon className="w-8 h-6" />
+                  <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
+                    <RussianFlagIcon className="w-6 h-6" />
+                  </div>
                 </div>
                 <button 
                   className="w-5 h-5 flex items-center justify-center"
@@ -514,7 +516,9 @@ const Login = ({ onClose, onLoginSuccess }) => {
 
                   {/* Язык */}
                   <div className="w-full flex items-center gap-3 text-vip-blue py-3 px-2 rounded-lg">
-                    <RussianFlagIcon className="w-6 h-6" />
+                    <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
+                      <RussianFlagIcon className="w-6 h-6" />
+                    </div>
                     <span className="text-base">Россия</span>
                   </div>
 

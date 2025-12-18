@@ -25,7 +25,7 @@ export const PeopleIcon = ({ className = "w-5 h-5" }) => (
 )
 
 export const RussianFlagIcon = ({ className = "w-5 h-5" }) => (
-  <svg className={className} viewBox="0 0 640 480" fill="none">
+  <svg className={className} viewBox="0 0 640 480" fill="none" preserveAspectRatio="xMidYMid slice">
     <rect width="640" height="160" fill="#fff"/>
     <rect y="160" width="640" height="160" fill="#0039a6"/>
     <rect y="320" width="640" height="160" fill="#d52b1e"/>
