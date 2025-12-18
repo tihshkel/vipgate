@@ -1,3 +1,6 @@
+# Root node_modules
+node_modules/
+
 # Frontend
 Frontend/node_modules/
 Frontend/dist/
