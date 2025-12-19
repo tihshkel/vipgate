@@ -133,6 +133,8 @@ services:
       - GLOBAL_DB_PASSWORD=${POSTGRES_PASSWORD}
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - SENDGRID_FROM_EMAIL=${SENDGRID_FROM_EMAIL:-noreply@vipgate.com}
     volumes:
       - backend-media:/app/media
       - backend-logs:/app/logs
