@@ -192,7 +192,15 @@ def update_profile(request):
         partial = request.method == 'PATCH'
         serializer = UserProfileSerializer(user, data=request.data, partial=partial)
         if serializer.is_valid():
-            serializer.save()
+            # ВАЖНО: Обновляем поля пользователя из валидных данных
+            validated_data = serializer.validated_data
+            for field, value in validated_data.items():
+                setattr(user, field, value)
+            # ВАЖНО: Сохраняем в правильную региональную БД
+            user.save(using=db)
+            logger.info(f"[OK] Профиль обновлен для {email} в БД {db}")
+            # Обновляем сериализатор с сохраненными данными
+            serializer = UserProfileSerializer(user)
             return Response(
                 {
                     "message": "Профиль успешно обновлен",
