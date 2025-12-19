@@ -4,7 +4,7 @@
 // USE_LOCALHOST: true = localhost для разработки, false = продакшен сервер (109.73.198.109)
 
 const USE_MOCK = false  // ← ИЗМЕНИТЕ НА false ДЛЯ РАБОТЫ С БЭКЕНДОМ
-const USE_LOCALHOST = true  // ← ИЗМЕНИТЕ НА false ДЛЯ РАБОТЫ С ПРОДАКШЕН СЕРВЕРОМ
+const USE_LOCALHOST = false  // ← ИЗМЕНИТЕ НА false ДЛЯ РАБОТЫ С ПРОДАКШЕН СЕРВЕРОМ
 
 // Определение BASE_URL на основе режима
 const getBaseUrl = () => {
@@ -17,7 +17,8 @@ const getBaseUrl = () => {
   if (USE_LOCALHOST) {
     return 'http://localhost:8000'
   } else {
-    return 'http://109.73.198.109:8000'
+    // В продакшене используем nginx на порту 80 (без указания порта)
+    return 'http://109.73.198.109'
   }
 }
 
