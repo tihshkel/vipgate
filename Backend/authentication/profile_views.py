@@ -219,11 +219,6 @@ def update_profile(request):
                 serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST
             )
-        else:
-            return Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
-            )
     except Exception as e:
         logger.error(f"Error updating profile: {str(e)}")
         return Response(
