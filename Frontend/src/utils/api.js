@@ -28,6 +28,7 @@ export const apiRequest = async (endpoint, options = {}) => {
   } else {
     // Используем реальный API
     const url = getApiUrl(endpoint)
+    console.log('[API Request]', options.method || 'GET', url, options)
     return fetch(url, options)
   }
 }
