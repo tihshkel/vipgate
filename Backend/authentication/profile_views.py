@@ -194,11 +194,16 @@ def update_profile(request):
         if serializer.is_valid():
             # ВАЖНО: Обновляем поля пользователя из валидных данных
             validated_data = serializer.validated_data
+            logger.info(f"[DEBUG] Обновление профиля для {email} в БД {db}, данные: {validated_data}")
             for field, value in validated_data.items():
                 setattr(user, field, value)
+                logger.info(f"[DEBUG] Установлено поле {field} = {value}")
             # ВАЖНО: Сохраняем в правильную региональную БД
             user.save(using=db)
             logger.info(f"[OK] Профиль обновлен для {email} в БД {db}")
+            # Обновляем объект из БД, чтобы убедиться, что данные сохранены
+            user.refresh_from_db()
+            logger.info(f"[DEBUG] После сохранения - Имя: {user.first_name}, Фамилия: {user.last_name}, Телефон: {user.phone}")
             # Обновляем сериализатор с сохраненными данными
             serializer = UserProfileSerializer(user)
             return Response(
@@ -207,6 +212,12 @@ def update_profile(request):
                     "data": serializer.data
                 },
                 status=status.HTTP_200_OK
+            )
+        else:
+            logger.error(f"[ERROR] Ошибки валидации для {email}: {serializer.errors}")
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
             )
         else:
             return Response(
