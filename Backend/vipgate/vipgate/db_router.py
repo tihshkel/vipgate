@@ -43,7 +43,15 @@ class GlobalRegionalRouter:
     def allow_migrate(self, db, app_label, model_name=None, **hints):
         """Определяет, где выполнять миграции."""
         if app_label in self.GLOBAL_APPS:
-            return db == 'global'
+            # Глобальные приложения только в глобальной БД
+            if app_label == 'global_db':
+                return db == 'global'
+            # auth и contenttypes нужны и в региональных БД для PermissionsMixin
+            elif app_label in ['auth', 'contenttypes']:
+                return db in ['global', 'us_canada', 'europe', 'asia', 'south_america', 'middle_east']
+            # admin, sessions только в глобальной БД
+            else:
+                return db == 'global'
         elif app_label in self.REGIONAL_APPS:
             return db in ['us_canada', 'europe', 'asia', 'south_america', 'middle_east']
         return None
