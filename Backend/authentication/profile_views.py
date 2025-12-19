@@ -8,7 +8,9 @@ from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from vipgate.regional_db.models import User
+from vipgate.global_db.models import UserRegistry, Region
 from .profile_serializers import UserProfileSerializer
+from vipgate.vipgate.utils import get_region_from_ip, get_user_region_from_email, ensure_regions_exist
 from django.conf import settings
 import os
 import uuid
@@ -18,11 +20,35 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def get_regional_db_for_user(email):
+def get_client_ip(request):
+    """Получает IP адрес клиента."""
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR', '127.0.0.1')
+    return ip
+
+
+def get_regional_db_for_user(email, request=None):
     """
     Определяет региональную БД для пользователя.
-    Пока используем дефолтную БД, в будущем можно определить по IP или другим параметрам.
+    ВАЖНО: Сначала пытается найти регион пользователя в глобальном реестре,
+    если не найден - определяет по IP адресу.
+    Пользователь должен быть создан ТОЛЬКО в одной региональной БД!
     """
+    # Пытаемся получить регион из глобального реестра (это приоритет!)
+    region = get_user_region_from_email(email)
+    if region:
+        return region
+    
+    # Если регион не найден в реестре, определяем по IP
+    if request:
+        client_ip = get_client_ip(request)
+        region = get_region_from_ip(client_ip)
+        return region
+    
+    # По умолчанию используем us_canada
     return 'us_canada'
 
 
@@ -51,14 +77,50 @@ def get_profile(request):
                 {"error": "Email не указан"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        db = get_regional_db_for_user(email)
+        # ВАЖНО: Убеждаемся, что регионы существуют в глобальной БД
+        try:
+            ensure_regions_exist()
+        except Exception as e:
+            logger.warning(f"[WARNING] Не удалось проверить/создать регионы: {str(e)}")
+        
+        # ВАЖНО: Сначала проверяем/создаем запись в глобальном реестре, чтобы определить правильную региональную БД
+        try:
+            user_registry = UserRegistry.objects.using('global').get(email=email)
+            db = user_registry.region.code
+        except UserRegistry.DoesNotExist:
+            # Если пользователя нет в реестре, определяем БД по IP
+            db = get_regional_db_for_user(email, request)
+            
+            # Создаем запись в глобальном реестре ДО создания пользователя в региональной БД
+            try:
+                ensure_regions_exist()  # Убеждаемся, что регионы созданы
+                region = Region.objects.using('global').get(code=db)
+                user_registry = UserRegistry.objects.using('global').create(
+                    email=email,
+                    region=region,
+                    is_active=True
+                )
+                logger.info(f"[OK] Создана запись в глобальном реестре для {email}, регион: {db}")
+            except Region.DoesNotExist:
+                logger.error(f"[ERROR] Регион {db} не найден в глобальной БД для {email}")
+                raise
+            except Exception as e:
+                # Если таблицы не существуют или регион не найден, логируем критическую ошибку
+                logger.error(f"[ERROR] КРИТИЧЕСКАЯ ОШИБКА: Не удалось создать запись в глобальном реестре для {email}: {str(e)}")
+                logger.error(f"Тип ошибки: {type(e).__name__}")
+                logger.error("Убедитесь, что миграции применены: python manage.py migrate global_db --database=global")
+                raise  # Пробрасываем исключение, чтобы не продолжать без записи в глобальной БД
+        
+        # Создаем пользователя ТОЛЬКО в нужной региональной БД
         try:
             user = User.objects.using(db).get(email=email)
         except User.DoesNotExist:
+            # Создаем пользователя ТОЛЬКО в одной региональной БД
             user = User.objects.using(db).create(
                 email=email,
                 is_verified=True
             )
+            logger.info(f"[OK] Создан пользователь в региональной БД {db} для {email}")
         serializer = UserProfileSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
     except Exception as e:
@@ -83,14 +145,50 @@ def update_profile(request):
                 {"error": "Email не указан"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        db = get_regional_db_for_user(email)
+        # ВАЖНО: Убеждаемся, что регионы существуют в глобальной БД
+        try:
+            ensure_regions_exist()
+        except Exception as e:
+            logger.warning(f"[WARNING] Не удалось проверить/создать регионы: {str(e)}")
+        
+        # ВАЖНО: Сначала проверяем/создаем запись в глобальном реестре, чтобы определить правильную региональную БД
+        try:
+            user_registry = UserRegistry.objects.using('global').get(email=email)
+            db = user_registry.region.code
+        except UserRegistry.DoesNotExist:
+            # Если пользователя нет в реестре, определяем БД по IP
+            db = get_regional_db_for_user(email, request)
+            
+            # Создаем запись в глобальном реестре ДО создания пользователя в региональной БД
+            try:
+                ensure_regions_exist()  # Убеждаемся, что регионы созданы
+                region = Region.objects.using('global').get(code=db)
+                user_registry = UserRegistry.objects.using('global').create(
+                    email=email,
+                    region=region,
+                    is_active=True
+                )
+                logger.info(f"[OK] Создана запись в глобальном реестре для {email}, регион: {db}")
+            except Region.DoesNotExist:
+                logger.error(f"[ERROR] Регион {db} не найден в глобальной БД для {email}")
+                raise
+            except Exception as e:
+                # Если таблицы не существуют или регион не найден, логируем критическую ошибку
+                logger.error(f"[ERROR] КРИТИЧЕСКАЯ ОШИБКА: Не удалось создать запись в глобальном реестре для {email}: {str(e)}")
+                logger.error(f"Тип ошибки: {type(e).__name__}")
+                logger.error("Убедитесь, что миграции применены: python manage.py migrate global_db --database=global")
+                raise  # Пробрасываем исключение, чтобы не продолжать без записи в глобальной БД
+        
+        # Создаем пользователя ТОЛЬКО в нужной региональной БД
         try:
             user = User.objects.using(db).get(email=email)
         except User.DoesNotExist:
+            # Создаем пользователя ТОЛЬКО в одной региональной БД
             user = User.objects.using(db).create(
                 email=email,
                 is_verified=True
             )
+            logger.info(f"[OK] Создан пользователь в региональной БД {db} для {email}")
         partial = request.method == 'PATCH'
         serializer = UserProfileSerializer(user, data=request.data, partial=partial)
         if serializer.is_valid():
@@ -157,11 +255,47 @@ def upload_profile_photo(request):
                 destination.write(chunk)
         media_url = getattr(settings, 'MEDIA_URL', '/media/')
         photo_url = f"{media_url}profile_photos/{filename}"
-        db = get_regional_db_for_user(email)
+        # ВАЖНО: Убеждаемся, что регионы существуют в глобальной БД
+        try:
+            ensure_regions_exist()
+        except Exception as e:
+            logger.warning(f"[WARNING] Не удалось проверить/создать регионы: {str(e)}")
+        
+        # ВАЖНО: Сначала проверяем/создаем запись в глобальном реестре, чтобы определить правильную региональную БД
+        try:
+            user_registry = UserRegistry.objects.using('global').get(email=email)
+            db = user_registry.region.code
+        except UserRegistry.DoesNotExist:
+            # Если пользователя нет в реестре, определяем БД по IP
+            db = get_regional_db_for_user(email, request)
+            
+            # Создаем запись в глобальном реестре ДО создания пользователя в региональной БД
+            try:
+                ensure_regions_exist()  # Убеждаемся, что регионы созданы
+                region = Region.objects.using('global').get(code=db)
+                user_registry = UserRegistry.objects.using('global').create(
+                    email=email,
+                    region=region,
+                    is_active=True
+                )
+                logger.info(f"[OK] Создана запись в глобальном реестре для {email}, регион: {db}")
+            except Region.DoesNotExist:
+                logger.error(f"[ERROR] Регион {db} не найден в глобальной БД для {email}")
+                raise
+            except Exception as e:
+                # Если таблицы не существуют или регион не найден, логируем критическую ошибку
+                logger.error(f"[ERROR] КРИТИЧЕСКАЯ ОШИБКА: Не удалось создать запись в глобальном реестре для {email}: {str(e)}")
+                logger.error(f"Тип ошибки: {type(e).__name__}")
+                logger.error("Убедитесь, что миграции применены: python manage.py migrate global_db --database=global")
+                raise  # Пробрасываем исключение, чтобы не продолжать без записи в глобальной БД
+        
+        # Создаем пользователя ТОЛЬКО в нужной региональной БД
         try:
             user = User.objects.using(db).get(email=email)
         except User.DoesNotExist:
+            # Создаем пользователя ТОЛЬКО в одной региональной БД
             user = User.objects.using(db).create(email=email, is_verified=True)
+            logger.info(f"[OK] Создан пользователь в региональной БД {db} для {email}")
         user.profile_photo_url = photo_url
         user.save(using=db)
         return Response(

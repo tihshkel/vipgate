@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import Header from '../../components/layout/Header'
 import Footer from '../../components/layout/Footer'
+import { getApiUrl, API_CONFIG } from '../../config/api'
 
 // Icons
 import PersonalDataIcon from '../../assets/icons/welcome/Icon/Main/40/personal-data.svg'
@@ -101,7 +102,7 @@ const PersonalData = ({ userEmail, onLogout }) => {
     
     setIsLoading(true)
     try {
-      const response = await fetch(`http://localhost:8000/api/auth/profile/?email=${encodeURIComponent(email)}`)
+      const response = await fetch(`${getApiUrl(API_CONFIG.ENDPOINTS.GET_PROFILE)}?email=${encodeURIComponent(email)}`)
       if (response.ok) {
         const data = await response.json()
         
@@ -154,7 +155,7 @@ const PersonalData = ({ userEmail, onLogout }) => {
         nationality: citizenship.trim(),
       }
       
-      const response = await fetch('http://localhost:8000/api/auth/profile/update/', {
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.UPDATE_PROFILE), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -192,7 +193,7 @@ const PersonalData = ({ userEmail, onLogout }) => {
       formData.append('photo', photoFile)
       formData.append('email', email)
       
-      const response = await fetch('http://localhost:8000/api/auth/profile/upload-photo/', {
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.UPLOAD_PHOTO), {
         method: 'POST',
         body: formData,
       })

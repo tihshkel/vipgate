@@ -52,6 +52,16 @@ class User(AbstractBaseUser, PermissionsMixin):
     phone = models.CharField(max_length=20, blank=True, verbose_name="Телефон")
     phone_country_code = models.CharField(max_length=5, blank=True, default='+7', verbose_name="Код страны телефона")
     date_of_birth = models.DateField(null=True, blank=True, verbose_name="Дата рождения")
+    gender = models.CharField(
+        max_length=20,
+        blank=True,
+        choices=[
+            ('male', 'Мужской'),
+            ('female', 'Женский'),
+            ('other', 'Другое'),
+        ],
+        verbose_name="Пол"
+    )
     nationality = models.CharField(max_length=100, blank=True, verbose_name="Гражданство")
     profile_photo_url = models.URLField(max_length=500, blank=True, verbose_name="URL фото профиля")
     language = models.CharField(max_length=10, default='ru', verbose_name="Язык")

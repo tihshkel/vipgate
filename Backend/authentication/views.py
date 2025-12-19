@@ -10,7 +10,9 @@ import logging
 
 from .serializers import EmailVerificationRequestSerializer, CodeVerificationSerializer
 from .tasks import send_verification_code_email
-from django.core.mail import send_mail
+from vipgate.regional_db.models import User
+from vipgate.global_db.models import UserRegistry, Region
+from vipgate.vipgate.utils import get_region_from_ip, get_user_region_from_email, ensure_regions_exist
 from django.conf import settings
 import secrets
 import string
@@ -89,17 +91,12 @@ def send_verification_code(request):
     try:
         task_result = send_verification_code_email.delay(email, code)
         logger.info(f"Celery задача отправлена для {email}. Task ID: {task_result.id}")
-        print("\n" + "="*50)
-        print(f"CELERY: Код верификации отправлен асинхронно для {email}: {code}")
-        print(f"Task ID: {task_result.id}")
-        print("="*50 + "\n")
     except Exception as e:
-        logger.warning(f"⚠️ Celery недоступен, отправляем email синхронно: {str(e)}")
-        print(f"\n⚠️ ВНИМАНИЕ: Celery не используется, отправка синхронная: {str(e)}\n")
+        logger.warning(f"[WARNING] Celery недоступен, отправляем email синхронно: {str(e)}")
         try:
+            from .email_utils import send_email_via_sendgrid
             subject = "Код подтверждения VIPGate"
-            message = f"""
-Здравствуйте!
+            message = f"""Здравствуйте!
 
 Ваш код подтверждения для входа в VIPGate: {code}
 
@@ -108,19 +105,18 @@ def send_verification_code(request):
 Если вы не запрашивали этот код, проигнорируйте это письмо.
 
 С уважением,
-Команда VIPGate
-            """.strip()
-            send_mail(
+Команда VIPGate""".strip()
+            
+            success = send_email_via_sendgrid(
+                to_email=email,
                 subject=subject,
-                message=message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[email],
-                fail_silently=False,
+                message=message
             )
-            print("\n" + "="*50)
-            print(f"КОД ВЕРИФИКАЦИИ для {email}: {code}")
-            print("="*50 + "\n")
-            logger.info(f"Verification code sent synchronously to {email}: {code}")
+            
+            if success:
+                logger.info(f"Verification code sent synchronously to {email} via SendGrid")
+            else:
+                logger.error(f"Failed to send email synchronously to {email} via SendGrid")
         except Exception as email_error:
             logger.error(f"Failed to send email synchronously to {email}: {str(email_error)}")
 
@@ -194,7 +190,72 @@ def verify_code(request):
     stored_code = code_data.get('code')
     if stored_code == code:
         cache.delete(code_key)
-        logger.info(f"Email {email} verified successfully")
+        
+        # ВАЖНО: Убеждаемся, что регионы существуют в глобальной БД
+        try:
+            ensure_regions_exist()
+        except Exception as e:
+            logger.warning(f"[WARNING] Не удалось проверить/создать регионы: {str(e)}")
+        
+        # ВАЖНО: Сначала проверяем глобальный реестр, чтобы определить правильную региональную БД
+        # Пользователь должен быть создан ТОЛЬКО в одной региональной БД на основе region_id!
+        try:
+            user_registry = UserRegistry.objects.using('global').get(email=email)
+            region_code = user_registry.region.code
+        except UserRegistry.DoesNotExist:
+            # Если пользователя нет в реестре, определяем регион по IP и создаем запись в реестре
+            client_ip = get_client_ip(request)
+            region_code = get_region_from_ip(client_ip)
+            
+            # Создаем запись в глобальном реестре - ВАЖНО: это должно произойти ДО создания пользователя в региональной БД
+            try:
+                # Убеждаемся, что регион существует
+                ensure_regions_exist()
+                region = Region.objects.using('global').get(code=region_code)
+                user_registry = UserRegistry.objects.using('global').create(
+                    email=email,
+                    region=region,
+                    is_active=True
+                )
+                logger.info(f"[OK] Создана запись в глобальном реестре для {email}, регион: {region_code}")
+            except Region.DoesNotExist:
+                # Если регион не найден, используем europe по умолчанию (вместо us_canada)
+                logger.warning(f"[WARNING] Регион {region_code} не найден в глобальной БД, используем europe")
+                try:
+                    ensure_regions_exist()  # Убеждаемся, что регионы созданы
+                    region = Region.objects.using('global').get(code='europe')
+                    user_registry = UserRegistry.objects.using('global').create(
+                        email=email,
+                        region=region,
+                        is_active=True
+                    )
+                    region_code = 'europe'
+                    logger.info(f"[OK] Создана запись в глобальном реестре для {email}, регион: europe (по умолчанию)")
+                except Exception as e:
+                    logger.error(f"[ERROR] КРИТИЧЕСКАЯ ОШИБКА: Не удалось создать запись в глобальном реестре для {email}: {str(e)}")
+                    logger.error(f"Тип ошибки: {type(e).__name__}")
+                    logger.error("Убедитесь, что миграции применены: python manage.py migrate global_db --database=global")
+                    raise  # Пробрасываем исключение, чтобы не продолжать с неправильным регионом
+            except Exception as e:
+                # Если глобальная БД не настроена, логируем критическую ошибку
+                logger.error(f"❌ КРИТИЧЕСКАЯ ОШИБКА: Не удалось создать запись в глобальном реестре для {email}: {str(e)}")
+                logger.error(f"Тип ошибки: {type(e).__name__}")
+                logger.error("Убедитесь, что миграции применены: python manage.py migrate global_db --database=global")
+                raise  # Пробрасываем исключение, чтобы не продолжать без записи в глобальной БД
+        
+        # Создаем пользователя ТОЛЬКО в одной региональной БД
+        try:
+            user = User.objects.using(region_code).get(email=email)
+            user.is_verified = True
+            user.save(using=region_code)
+        except User.DoesNotExist:
+            # Создаем пользователя ТОЛЬКО в нужной региональной БД
+            User.objects.using(region_code).create(
+                email=email,
+                is_verified=True
+            )
+        
+        logger.info(f"Email {email} verified successfully, region: {region_code}")
 
         return Response(
             {

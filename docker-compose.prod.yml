@@ -1,0 +1,187 @@
+version: '3.8'
+
+services:
+  # PostgreSQL для глобальной БД
+  postgres-global:
+    image: postgres:16-alpine
+    container_name: vipgate-postgres-global
+    environment:
+      POSTGRES_DB: vipgate_global
+      POSTGRES_USER: vipgate_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-global-data:/var/lib/postgresql/data
+    networks:
+      - vipgate-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vipgate_user -d vipgate_global"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgreSQL для региональных БД
+  postgres-regional:
+    image: postgres:16-alpine
+    container_name: vipgate-postgres-regional
+    environment:
+      POSTGRES_DB: vipgate_regional
+      POSTGRES_USER: vipgate_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-regional-data:/var/lib/postgresql/data
+      - ./init-regional-dbs.sql:/docker-entrypoint-initdb.d/init-regional-dbs.sql
+    networks:
+      - vipgate-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vipgate_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    container_name: vipgate-redis
+    volumes:
+      - redis-data:/data
+    networks:
+      - vipgate-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend Django
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: vipgate-backend
+    environment:
+      - DEBUG=False
+      - SECRET_KEY=${SECRET_KEY}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-109.73.198.109,localhost}
+      - USE_POSTGRESQL=True
+      - GLOBAL_DB_ENGINE=django.db.backends.postgresql
+      - GLOBAL_DB_NAME=vipgate_global
+      - GLOBAL_DB_USER=vipgate_user
+      - GLOBAL_DB_PASSWORD=${POSTGRES_PASSWORD}
+      - GLOBAL_DB_HOST=postgres-global
+      - GLOBAL_DB_PORT=5432
+      - REGIONAL_DB_ENGINE=django.db.backends.postgresql
+      - REGIONAL_DB_USER=vipgate_user
+      - REGIONAL_DB_PASSWORD=${POSTGRES_PASSWORD}
+      - REGIONAL_DB_PORT=5432
+      - US_CANADA_DB_NAME=vipgate_us_canada
+      - US_CANADA_DB_HOST=postgres-regional
+      - EUROPE_DB_NAME=vipgate_europe
+      - EUROPE_DB_HOST=postgres-regional
+      - ASIA_DB_NAME=vipgate_asia
+      - ASIA_DB_HOST=postgres-regional
+      - SOUTH_AMERICA_DB_NAME=vipgate_south_america
+      - SOUTH_AMERICA_DB_HOST=postgres-regional
+      - MIDDLE_EAST_DB_NAME=vipgate_middle_east
+      - MIDDLE_EAST_DB_HOST=postgres-regional
+      - REDIS_URL=redis://redis:6379/1
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - FRONTEND_URL=http://109.73.198.109
+      - BACKEND_URL=http://109.73.198.109:8000
+      - CORS_ALLOWED_ORIGINS=http://109.73.198.109,https://109.73.198.109
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - SENDGRID_FROM_EMAIL=${SENDGRID_FROM_EMAIL:-noreply@vipgate.com}
+    volumes:
+      - backend-media:/app/media
+      - backend-logs:/app/logs
+    depends_on:
+      postgres-global:
+        condition: service_healthy
+      postgres-regional:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - vipgate-network
+    restart: unless-stopped
+    command: >
+      sh -c "python manage.py migrate global_db --database=global &&
+             python manage.py migrate regional_db --database=us_canada &&
+             python manage.py migrate regional_db --database=europe &&
+             python manage.py migrate regional_db --database=asia &&
+             python manage.py migrate regional_db --database=south_america &&
+             python manage.py migrate regional_db --database=middle_east &&
+             gunicorn vipgate.vipgate.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 120"
+
+  # Celery Worker
+  celery:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: vipgate-celery
+    environment:
+      - DEBUG=False
+      - SECRET_KEY=${SECRET_KEY}
+      - USE_POSTGRESQL=True
+      - GLOBAL_DB_HOST=postgres-global
+      - GLOBAL_DB_USER=vipgate_user
+      - GLOBAL_DB_PASSWORD=${POSTGRES_PASSWORD}
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    volumes:
+      - backend-media:/app/media
+      - backend-logs:/app/logs
+    depends_on:
+      - redis
+      - postgres-global
+      - postgres-regional
+    networks:
+      - vipgate-network
+    restart: unless-stopped
+    command: celery -A vipgate.vipgate.celery worker --loglevel=info
+
+  # Frontend React
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=http://109.73.198.109:8000
+    container_name: vipgate-frontend
+    depends_on:
+      - backend
+    networks:
+      - vipgate-network
+    restart: unless-stopped
+
+  # Nginx для проксирования
+  nginx:
+    image: nginx:alpine
+    container_name: vipgate-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - vipgate-network
+    restart: unless-stopped
+
+networks:
+  vipgate-network:
+    driver: bridge
+
+volumes:
+  postgres-global-data:
+  postgres-regional-data:
+  redis-data:
+  backend-media:
+  backend-logs:
+

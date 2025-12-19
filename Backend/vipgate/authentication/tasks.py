@@ -1,9 +1,9 @@
 from celery import shared_task
-from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
 import logging
+from .email_utils import send_email_via_sendgrid
 
 logger = logging.getLogger(__name__)
 
@@ -11,13 +11,12 @@ logger = logging.getLogger(__name__)
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def send_verification_code_email(self, email: str, code: str):
     """
-    Асинхронная задача Celery для отправки кода верификации на email.
+    Асинхронная задача Celery для отправки кода верификации на email через SendGrid.
     Использует retry механизм для надежности.
     """
     try:
         subject = "Код подтверждения VIPGate"
-        message = f"""
-Здравствуйте!
+        message = f"""Здравствуйте!
 
 Ваш код подтверждения для входа в VIPGate: {code}
 
@@ -26,19 +25,19 @@ def send_verification_code_email(self, email: str, code: str):
 Если вы не запрашивали этот код, проигнорируйте это письмо.
 
 С уважением,
-Команда VIPGate
-        """.strip()
+Команда VIPGate""".strip()
 
-        send_mail(
+        success = send_email_via_sendgrid(
+            to_email=email,
             subject=subject,
-            message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[email],
-            fail_silently=False,
+            message=message
         )
 
-        logger.info(f"Verification code sent successfully to {email}")
-        return {"status": "success", "email": email}
+        if success:
+            logger.info(f"Verification code sent successfully to {email} via SendGrid")
+            return {"status": "success", "email": email}
+        else:
+            raise Exception("SendGrid вернул ошибку при отправке email")
 
     except Exception as exc:
         logger.error(f"Failed to send verification code to {email}: {str(exc)}")

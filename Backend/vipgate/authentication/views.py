@@ -89,7 +89,32 @@ def send_verification_code(request):
         send_verification_code_email.delay(email, code)
     except Exception as e:
         logger.warning(f"Celery недоступен, отправляем email синхронно: {str(e)}")
-        send_verification_code_email(email, code)
+        try:
+            from .email_utils import send_email_via_sendgrid
+            subject = "Код подтверждения VIPGate"
+            message = f"""Здравствуйте!
+
+Ваш код подтверждения для входа в VIPGate: {code}
+
+Код действителен в течение 10 минут.
+
+Если вы не запрашивали этот код, проигнорируйте это письмо.
+
+С уважением,
+Команда VIPGate""".strip()
+            
+            success = send_email_via_sendgrid(
+                to_email=email,
+                subject=subject,
+                message=message
+            )
+            
+            if success:
+                logger.info(f"Verification code sent synchronously to {email} via SendGrid")
+            else:
+                logger.error(f"Failed to send email synchronously to {email} via SendGrid")
+        except Exception as email_error:
+            logger.error(f"Failed to send email synchronously to {email}: {str(email_error)}")
 
     cache.set(cache_key_ip, ip_requests + 1, 60)
     cache.set(cache_key_email, email_requests + 1, 60)

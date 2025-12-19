@@ -24,6 +24,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'birth_day',
             'birth_month',
             'birth_year',
+            'gender',
             'nationality',
             'profile_photo_url',
             'language',

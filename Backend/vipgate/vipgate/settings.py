@@ -18,7 +18,8 @@ env = environ.Env(
 )
 
 
-environ.Env.read_env(BASE_DIR / '.env')
+# Читаем .env из директории Backend
+environ.Env.read_env(BASE_DIR / 'Backend' / '.env')
 
 
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-!6a9h6b(!yk3kza$vubwgm^-cr_u5!uxno^zwbi@#v!hh07@1w')
@@ -295,6 +296,11 @@ EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL', default=False)
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='noreply@vipgate.com')
+
+# SendGrid настройки
+SENDGRID_API_KEY = env('SENDGRID_API_KEY', default='')
+SENDGRID_FROM_EMAIL = env('SENDGRID_FROM_EMAIL', default='noreply@vipgate.com')
+SENDGRID_FROM_NAME = env('SENDGRID_FROM_NAME', default='VIPGate Team')
 
 
 CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='redis://localhost:6379/0')

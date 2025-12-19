@@ -1,20 +1,40 @@
 // Конфигурация API
 // ПЕРЕКЛЮЧЕНИЕ РЕЖИМОВ:
-// true = работа БЕЗ бэкенда (mock данные)
-// false = работа С бэкендом (реальный API)
+// USE_MOCK: true = работа БЕЗ бэкенда (mock данные), false = работа С бэкендом (реальный API)
+// USE_LOCALHOST: true = localhost для разработки, false = продакшен сервер (109.73.198.109)
 
-const USE_MOCK = true  // ← ИЗМЕНИТЕ НА false ДЛЯ РАБОТЫ С БЭКЕНДОМ
+const USE_MOCK = false  // ← ИЗМЕНИТЕ НА false ДЛЯ РАБОТЫ С БЭКЕНДОМ
+const USE_LOCALHOST = true  // ← ИЗМЕНИТЕ НА false ДЛЯ РАБОТЫ С ПРОДАКШЕН СЕРВЕРОМ
+
+// Определение BASE_URL на основе режима
+const getBaseUrl = () => {
+  // Если указана переменная окружения, используем её
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL
+  }
+  
+  // Иначе используем переключатель USE_LOCALHOST
+  if (USE_LOCALHOST) {
+    return 'http://localhost:8000'
+  } else {
+    return 'http://109.73.198.109:8000'
+  }
+}
 
 export const API_CONFIG = {
   MOCK_MODE: USE_MOCK,
+  USE_LOCALHOST: USE_LOCALHOST,
   
   // URL бэкенда
-  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
+  BASE_URL: getBaseUrl(),
   
   // Эндпоинты
   ENDPOINTS: {
     SEND_CODE: '/api/auth/send-code/',
     VERIFY_CODE: '/api/auth/verify-code/',
+    GET_PROFILE: '/api/auth/profile/',
+    UPDATE_PROFILE: '/api/auth/profile/update/',
+    UPLOAD_PHOTO: '/api/auth/profile/upload-photo/',
   }
 }
 

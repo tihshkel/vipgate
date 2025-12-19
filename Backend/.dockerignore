@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Django
+*.log
+db.sqlite3
+db_*.sqlite3
+/media
+/staticfiles
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Environment
+.env
+.env.local
+
+# Logs
+logs/
+*.log
+
+# Migrations (опционально, можно оставить)
+# */migrations/*.py
+# !*/migrations/__init__.py
+

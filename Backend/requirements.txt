@@ -24,6 +24,7 @@ geoip2>=4.7.0
 # Email
 django-ses>=3.5.0
 aiosmtplib>=3.0.0
+sendgrid>=6.10.0
 
 # Security & Rate Limiting
 django-ratelimit>=4.1.0
@@ -35,4 +36,7 @@ pytz>=2023.3
 
 # Development
 django-debug-toolbar>=4.2.0
+
+# Production Server
+gunicorn>=21.2.0
 
