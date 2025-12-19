@@ -5,8 +5,9 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Аргументы сборки
-ARG VITE_API_BASE_URL=http://109.73.198.109:8000
-ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+# VITE_API_BASE_URL не устанавливаем, чтобы использовалась логика из api.js
+# ARG VITE_API_BASE_URL=http://109.73.198.109
+# ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
 # Копирование package файлов
 COPY package*.json ./

@@ -148,8 +148,9 @@ services:
     build:
       context: ./Frontend
       dockerfile: Dockerfile
-      args:
-        - VITE_API_BASE_URL=http://109.73.198.109:8000
+      # VITE_API_BASE_URL не устанавливаем, чтобы использовалась логика из api.js
+      # args:
+      #   - VITE_API_BASE_URL=http://109.73.198.109
     container_name: vipgate-frontend
     depends_on:
       - backend
