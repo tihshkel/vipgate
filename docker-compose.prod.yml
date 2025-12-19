@@ -65,6 +65,8 @@ services:
       - DEBUG=False
       - SECRET_KEY=${SECRET_KEY}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS:-109.73.198.109,localhost}
+      - SECURE_SSL_REDIRECT=False
+      - APPEND_SLASH=False
       - USE_POSTGRESQL=True
       - GLOBAL_DB_ENGINE=django.db.backends.postgresql
       - GLOBAL_DB_NAME=vipgate_global

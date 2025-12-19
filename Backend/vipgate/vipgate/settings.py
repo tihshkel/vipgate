@@ -27,6 +27,9 @@ SECRET_KEY = env('SECRET_KEY', default='django-insecure-!6a9h6b(!yk3kza$vubwgm^-
 
 DEBUG = env('DEBUG', default=True)
 
+# Отключаем автоматическое добавление слэша в конце URL
+APPEND_SLASH = env('APPEND_SLASH', default=False)
+
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
 
 
