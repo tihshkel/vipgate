@@ -406,9 +406,11 @@ else:
 
 
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
+    # SSL настройки (отключены, так как SSL не настроен)
+    # Включите эти настройки, когда настроите SSL сертификаты
+    SECURE_SSL_REDIRECT = env('SECURE_SSL_REDIRECT', default=False)  # Отключено, так как нет SSL
+    SESSION_COOKIE_SECURE = env('SESSION_COOKIE_SECURE', default=False)  # Отключено, так как нет SSL
+    CSRF_COOKIE_SECURE = env('CSRF_COOKIE_SECURE', default=False)  # Отключено, так как нет SSL
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = 'DENY'
