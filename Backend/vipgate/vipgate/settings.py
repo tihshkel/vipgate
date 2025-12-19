@@ -55,6 +55,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# Отключаем автоматическое добавление слэша в конце URL
+APPEND_SLASH = False
+
 ROOT_URLCONF = 'vipgate.urls'
 
 TEMPLATES = [
