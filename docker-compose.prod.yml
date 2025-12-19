@@ -109,21 +109,11 @@ services:
     restart: unless-stopped
     command: >
       sh -c "python manage.py migrate global_db --database=global &&
-             python manage.py migrate contenttypes --database=us_canada &&
-             python manage.py migrate auth --database=us_canada &&
-             python manage.py migrate regional_db --database=us_canada &&
-             python manage.py migrate contenttypes --database=europe &&
-             python manage.py migrate auth --database=europe &&
-             python manage.py migrate regional_db --database=europe &&
-             python manage.py migrate contenttypes --database=asia &&
-             python manage.py migrate auth --database=asia &&
-             python manage.py migrate regional_db --database=asia &&
-             python manage.py migrate contenttypes --database=south_america &&
-             python manage.py migrate auth --database=south_america &&
-             python manage.py migrate regional_db --database=south_america &&
-             python manage.py migrate contenttypes --database=middle_east &&
-             python manage.py migrate auth --database=middle_east &&
-             python manage.py migrate regional_db --database=middle_east &&
+             python manage.py migrate --database=us_canada --run-syncdb &&
+             python manage.py migrate --database=europe --run-syncdb &&
+             python manage.py migrate --database=asia --run-syncdb &&
+             python manage.py migrate --database=south_america --run-syncdb &&
+             python manage.py migrate --database=middle_east --run-syncdb &&
              gunicorn vipgate.vipgate.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 120"
 
   # Celery Worker
